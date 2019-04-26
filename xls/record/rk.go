@@ -42,11 +42,11 @@ func (r *Rk) GetCol() [2]byte {
 	return r.col
 }
 
-func (r *Rk) GetFloat64() (float64) {
+func (r *Rk) GetFloat64() float64 {
 	return r.rk.GetFloat()
 }
 
-func (r *Rk) GetInt64() (int64) {
+func (r *Rk) GetInt64() int64 {
 	return r.rk.GetInt64()
 }
 

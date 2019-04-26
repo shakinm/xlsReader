@@ -32,9 +32,11 @@ func (r *RKNum) number() (intNum int64, floatNum float64, isFloat bool) {
 }
 
 func (r *RKNum) GetFloat() (fn float64) {
-	_, f, isFloat := r.number()
+	i, f, isFloat := r.number()
 	if isFloat {
 		fn = f
+	} else {
+		fn=float64(i)
 	}
 	return fn
 }

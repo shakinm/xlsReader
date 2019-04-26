@@ -118,7 +118,9 @@ Next:
 
 	//BOOLERR - A Boolean or error value
 	if bytes.Compare(recordNumber, record.BoolErrRecord[:]) == 0 {
-		//todo: сделать
+		c := new(record.BoolErr)
+		c.Read(stream[sPoint : sPoint+recordDataLength])
+		s.addCell(c, c.GetRow(), c.GetCol())
 		goto EIF
 	}
 

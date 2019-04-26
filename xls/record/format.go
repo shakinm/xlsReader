@@ -1,8 +1,11 @@
 package record
 
 import (
+	"fmt"
+	"github.com/metakeule/fmtdate"
 	"github.com/shakinm/xlsReader/helpers"
 	"github.com/shakinm/xlsReader/xls/structure"
+	"strings"
 )
 
 //FORMAT: Number Format
@@ -31,8 +34,8 @@ see "XF".
 */
 
 type Format struct {
-	ifmt  [2]byte
-	stFormat  structure.XLUnicodeRichExtendedString
+	ifmt     [2]byte
+	stFormat structure.XLUnicodeRichExtendedString
 }
 
 func (r *Format) Read(stream []byte) {
@@ -44,11 +47,24 @@ func (r *Format) GetIndex() int {
 	return int(helpers.BytesToUint16(r.ifmt[:]))
 }
 
-func (r *Format) GetFormatString() string {
-	if r.GetIndex()==166 || r.GetIndex()==167 {
-		t:=helpers.TimeFromExcelTime(43533.550694,false)
-		return t.Format(r.stFormat.String())
-	}
-	return r.stFormat.String()
-}
+func (r *Format) GetFormatString(data structure.CellData) string {
+	if r.GetIndex() > 164 {
+		if data.GetType() == "*record.BoolErr" {
 
+		return data.GetString()
+		}
+		if data.GetType() == "*record.Number" {
+			if strings.Contains(r.stFormat.String(), "0.00") {
+				return fmt.Sprintf("%.2f", data.GetFloat64()*100) + "%"
+			}
+		}
+		if r.stFormat.String() == "General" {
+			return data.GetString()
+		}
+		t := helpers.TimeFromExcelTime(data.GetFloat64(), false)
+		dateFormat := strings.ReplaceAll(r.stFormat.String(), "HH:MM:SS", "hh:mm:ss")
+		dateFormat = strings.ReplaceAll(dateFormat, "\\", "")
+		return fmtdate.Format(dateFormat, t)
+	}
+	return data.GetString()
+}

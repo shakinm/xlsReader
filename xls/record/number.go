@@ -54,7 +54,7 @@ func (r *Number) GetString() string {
 }
 
 func (r *Number) GetFloat64() (fl float64) {
-	return fl
+	return r.GetFloat()
 }
 func (r *Number) GetInt64() (in int64) {
 	return in
@@ -74,4 +74,3 @@ func (r *Number) Read(stream []byte) {
 	copy(r.ixfe[:], stream[4:6])
 	copy(r.num[:], stream[6:14])
 }
-

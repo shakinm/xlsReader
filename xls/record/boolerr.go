@@ -1,5 +1,11 @@
 package record
 
+import (
+	"github.com/shakinm/xlsReader/helpers"
+	"reflect"
+	"strconv"
+)
+
 //BOOLERR: Cell Value, Boolean or Error
 
 var BoolErrRecord = []byte{0x05, 0x02} // (205h)
@@ -37,9 +43,73 @@ Error value		Value (hex)		Value (dec.)
 */
 
 type BoolErr struct {
-	Rw       [2]byte
-	Col      [2]byte
-	Ixfe     [2]byte
-	BBoolErr [1]byte
-	FError   [1]byte
+	rw       [2]byte
+	col      [2]byte
+	ixfe     [2]byte
+	bBoolErr [1]byte
+	fError   [1]byte
+}
+
+func (r *BoolErr) GetRow() [2]byte {
+	return r.rw
+}
+
+func (r *BoolErr) GetCol() [2]byte {
+	return r.col
+}
+
+func (r *BoolErr) GetFloat() float64 {
+
+	return float64(r.GetInt64())
+}
+
+func (r *BoolErr) GetString() string {
+	if int(r.fError[0]) == 1 {
+		switch r.GetInt64() {
+		case 0:
+			return "#NULL!"
+		case 7:
+			return "#DIV/0!"
+		case 15:
+			return "#VALUE!"
+		case 23:
+			return "#REF!"
+		case 29:
+			return "#NAME?"
+		case 36:
+			return "#NUM!!"
+		case 42:
+			return "#N/A"
+		}
+	} else {
+		if r.GetInt64() == 1 {
+			return "TRUE"
+		} else {
+			return "FALSE"
+		}
+	}
+	return strconv.FormatInt(r.GetInt64(), 10)
+}
+
+func (r *BoolErr) GetFloat64() (fl float64) {
+	return r.GetFloat()
+}
+func (r *BoolErr) GetInt64() int64 {
+	return int64(r.bBoolErr[0])
+}
+
+func (r *BoolErr) GetType() string {
+	return reflect.TypeOf(r).String()
+}
+
+func (r *BoolErr) GetXFIndex() int {
+	return int(helpers.BytesToUint16(r.ixfe[:]))
+}
+
+func (r *BoolErr) Read(stream []byte) {
+	copy(r.rw[:], stream[:2])
+	copy(r.col[:], stream[2:4])
+	copy(r.ixfe[:], stream[4:6])
+	copy(r.bBoolErr[:], stream[6:7])
+	copy(r.fError[:], stream[7:8])
 }
