@@ -31,6 +31,16 @@ func (wb *Workbook) GetSheet(sheetID int) (sheet *sheet, err error) { // nolint:
 	return nil, errors.New("error. sheet not found")
 }
 
+// GetXF -  Return Extended Format Record by index
+func (wb *Workbook) GetXFbyIndex(index int) record.XF {
+	return wb.xf[index]
+}
+
+// GetXF -  Return FORMAT record describes a number format in the workbook
+func (wb *Workbook) GetFormatByIndex(index int) record.Format {
+	return wb.formats[index]
+}
+
 // GetCodePage - codepage
 func (wb *Workbook) GetCodePage() record.CodePage {
 	return wb.codepage

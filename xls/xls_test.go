@@ -17,9 +17,9 @@ func TestGetWorkBook(t *testing.T) {
 
 	for k := range cells.cols {
 		c, _ := cells.GetCol(k)
-		xfIndex:=c.GetXFIndex()
-		formatIndex:=wb.xf[xfIndex].GetFormatIndex()
-		format:=wb.formats[formatIndex]
+
+		formatIndex:=wb.GetXFbyIndex(c.GetXFIndex())
+		format:=wb.GetFormatByIndex(formatIndex.GetFormatIndex())
 
 		if err == nil {
 			switch k {
