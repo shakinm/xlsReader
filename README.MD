@@ -6,7 +6,7 @@
 
 `$ go get github.com/shakinm/xlsReader`
 
-## Использование
+## Использование / Using
 
 ```go
 package main
