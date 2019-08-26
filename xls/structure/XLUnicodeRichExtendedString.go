@@ -1,8 +1,8 @@
 package structure
 
 import (
-	"unicode/utf16"
 	"github.com/shakinm/xlsReader/helpers"
+	"unicode/utf16"
 )
 
 type XLUnicodeRichExtendedString struct {
@@ -46,7 +46,7 @@ func (s *XLUnicodeRichExtendedString) Read(stream []byte) {
 	s.FHighByte = stream[iOft(&oft, 0):iOft(&oft, 1)][0]
 
 	if s.FHighByte&1 == 1 {
-		rgbSize = helpers.BytesToUint16(s.Cch[:])*2
+		rgbSize = helpers.BytesToUint16(s.Cch[:]) * 2
 
 	} else {
 		rgbSize = helpers.BytesToUint16(s.Cch[:])
@@ -96,13 +96,15 @@ func (s *XLUnicodeRichExtendedString) Read(stream []byte) {
 
 		//The number of elements in this array is rphssub.crun
 		phRunsSizeL := helpers.BytesToUint16(s.ExtRst.Rphssub.Crun[:])
-		for i := uint16(0); i <= phRunsSizeL; i++ {
-			var phRuns PhRuns
-			copy(phRuns.IchFirst[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-			copy(phRuns.IchMom[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-			copy(phRuns.CchMom[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
+		if phRunsSizeL > 0 {
+			for i := uint16(0); i <= phRunsSizeL; i++ {
+				var phRuns PhRuns
+				copy(phRuns.IchFirst[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
+				copy(phRuns.IchMom[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
+				copy(phRuns.CchMom[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
 
-			s.ExtRst.Rgphruns = append(s.ExtRst.Rgphruns, phRuns)
+				s.ExtRst.Rgphruns = append(s.ExtRst.Rgphruns, phRuns)
+			}
 		}
 	}
 }

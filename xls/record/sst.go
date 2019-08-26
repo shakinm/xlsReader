@@ -123,15 +123,17 @@ func (s *SST) Read(readType string, grbit byte, prevLen int32) () {
 				_rgb.ExtRst.Rphssub.St.RgchData = append(_rgb.ExtRst.Rphssub.St.RgchData, s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)]...)
 			}
 
-			//The number of elements in this array is rphssub.crun
+			////The number of elements in this array is rphssub.crun
 			phRunsSizeL := helpers.BytesToUint16(_rgb.ExtRst.Rphssub.Crun[:])
-			for i := uint16(0); i <= phRunsSizeL; i++ {
-				var phRuns structure.PhRuns
-				copy(phRuns.IchFirst[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-				copy(phRuns.IchMom[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-				copy(phRuns.CchMom[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
+			if phRunsSizeL > 0 {
+				for i := uint16(0); i <= phRunsSizeL; i++ {
+					var phRuns structure.PhRuns
+					copy(phRuns.IchFirst[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
+					copy(phRuns.IchMom[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
+					copy(phRuns.CchMom[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
 
-				_rgb.ExtRst.Rgphruns = append(_rgb.ExtRst.Rgphruns, phRuns)
+					_rgb.ExtRst.Rgphruns = append(_rgb.ExtRst.Rgphruns, phRuns)
+				}
 			}
 		}
 

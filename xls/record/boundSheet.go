@@ -50,7 +50,6 @@ func (r *BoundSheet) Read(stream []byte) {
 	copy(r.Grbit[:], stream[4:6])
 	copy(r.Cch[:], stream[6:7])
 
-
 	//offset 2
 	r.Rgch.FHighByte = stream[iOft(&oft, 0):iOft(&oft, 1)][0]
 
@@ -58,7 +57,7 @@ func (r *BoundSheet) Read(stream []byte) {
 		rgbSize = uint8(r.Cch[0]) * 2
 
 	} else {
-		rgbSize =  uint8(r.Cch[0])
+		rgbSize = uint8(r.Cch[0])
 
 	}
 
@@ -105,13 +104,15 @@ func (r *BoundSheet) Read(stream []byte) {
 
 		//The number of elements in this array is rphssub.crun
 		phRunsSizeL := helpers.BytesToUint16(r.Rgch.ExtRst.Rphssub.Crun[:])
-		for i := uint16(0); i <= phRunsSizeL; i++ {
-			var phRuns structure.PhRuns
-			copy(phRuns.IchFirst[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-			copy(phRuns.IchMom[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-			copy(phRuns.CchMom[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
+		if phRunsSizeL > 0 {
+			for i := uint16(0); i <= phRunsSizeL; i++ {
+				var phRuns structure.PhRuns
+				copy(phRuns.IchFirst[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
+				copy(phRuns.IchMom[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
+				copy(phRuns.CchMom[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
 
-			r.Rgch.ExtRst.Rgphruns = append(r.Rgch.ExtRst.Rgphruns, phRuns)
+				r.Rgch.ExtRst.Rgphruns = append(r.Rgch.ExtRst.Rgphruns, phRuns)
+			}
 		}
 	}
 
