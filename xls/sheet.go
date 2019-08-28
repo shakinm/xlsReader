@@ -64,8 +64,8 @@ func (rw *rw) GetCols() (cols []structure.CellData) {
 }
 
 // Get all rows
-func (s *sheet) GetRows() (rows []rw, err error) {
-	return s.rows, nil
+func (s *sheet) GetRows() (rows []rw) {
+	return s.rows
 }
 
 // Get number of rows
