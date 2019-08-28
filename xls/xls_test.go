@@ -90,26 +90,21 @@ func TestGetWorkBook(t *testing.T) {
 }
 
 func TestMiniFatWorkBook(t *testing.T) {
-	wb, err := OpenFile("./../testfie/table.xls")
+	wb, err := OpenFile("./../testfie/parts.xls")
 
 	if err != nil {
 		t.Error("Error: ", err)
 	}
 
-	s, err := wb.GetSheet(0)
+	for i := 0; i <= wb.GetNumberSheets()-1; i++ {
+		sheet, _ := wb.GetSheet(i)
 
-	if err != nil {
-		t.Fatal(err)
-	}
+		for _, row := range sheet.GetRows() {
 
-	row, err := s.GetRow(1)
+			for _, col := range row.GetCols() {
+			fmt.Println(col.GetString())
 
-	if err != nil {
-		t.Fatal(err)
+			}
+		}
 	}
-	c, err := row.GetCol(1)
-	if err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println(c.GetString())
 }
