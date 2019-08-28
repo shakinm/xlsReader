@@ -271,7 +271,7 @@ func (cfb *Cfb) getDataFromFatChain(offset uint32) (data []byte, err error) {
 // OpenObject - Get object stream
 func (cfb *Cfb) OpenObject(object *Directory, root *Directory) (reader io.ReadSeeker, err error) {
 
-	if helpers.BytesToUint16(object.StreamSize[:]) < helpers.BytesToUint16(cfb.header.MiniStreamCutoffSize[:]) {
+	if helpers.BytesToUint32(object.StreamSize[:]) < uint32(helpers.BytesToUint16(cfb.header.MiniStreamCutoffSize[:])) {
 
 		data, err := cfb.getDataFromMiniFat(root.GetStartingSectorLocation())
 
