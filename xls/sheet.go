@@ -54,8 +54,17 @@ func (rw *rw) GetCol(index int) (c structure.CellData, err error) {
 	return rw.cols[index].cell, nil
 }
 
+func (rw *rw) GetCols() (cols []structure.CellData) {
+
+	for _, c:= range rw.cols {
+		cols = append(cols, c.cell)
+	}
+
+	return cols
+}
+
 // Get all rows
-func (s *sheet) GetRows(index int) (rows []rw, err error) {
+func (s *sheet) GetRows() (rows []rw, err error) {
 	return s.rows, nil
 }
 
