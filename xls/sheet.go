@@ -6,7 +6,6 @@ import (
 	"github.com/shakinm/xlsReader/helpers"
 	"github.com/shakinm/xlsReader/xls/record"
 	"github.com/shakinm/xlsReader/xls/structure"
-	"github.com/jinzhu/copier"
 )
 
 type rw struct {
@@ -169,10 +168,9 @@ Next:
 	if bytes.Compare(recordNumber, record.MulRKRecord[:]) == 0 {
 		c := new(record.MulRk)
 		c.Read(stream[sPoint : sPoint+recordDataLength])
-		for _, rk := range c.GetArrayRKRecord() {
-			 cl := new(record.Rk)
-			copier.Copy(&cl , &rk)
-			s.addCell(cl.Get(), cl.GetRow(), cl.GetCol())
+		rkRecords := c.GetArrayRKRecord()
+		for i := 0; i <= len(rkRecords)-1; i++ {
+			s.addCell(rkRecords[i].Get(), rkRecords[i].GetRow(), rkRecords[i].GetCol())
 		}
 		goto EIF
 
