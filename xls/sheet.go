@@ -16,8 +16,6 @@ type col struct {
 	cell structure.CellData
 }
 
-
-
 type sheet struct {
 	boundSheet    *record.BoundSheet
 	rows          []rw
@@ -28,7 +26,7 @@ type sheet struct {
 }
 
 func (s *sheet) GetName() (string) {
-		return s.boundSheet.Rgch.String()
+	return s.boundSheet.Rgch.String()
 }
 
 // Get row by index
@@ -46,8 +44,8 @@ func (rw *rw) GetCol(index int) (c structure.CellData, err error) {
 		return c, errors.New("Out of range")
 	}
 
-	if rw.cols[index].cell==nil {
-		c=new(record.FakeBlank)
+	if rw.cols[index].cell == nil {
+		c = new(record.FakeBlank)
 		return c, nil
 	}
 	return rw.cols[index].cell, nil
@@ -55,8 +53,13 @@ func (rw *rw) GetCol(index int) (c structure.CellData, err error) {
 
 func (rw *rw) GetCols() (cols []structure.CellData) {
 
-	for _, c:= range rw.cols {
-		cols = append(cols, c.cell)
+	for _, c := range rw.cols {
+		if c.cell == nil {
+			cols = append(cols, new(record.FakeBlank))
+		} else {
+			cols = append(cols, c.cell)
+		}
+
 	}
 
 	return cols
@@ -85,7 +88,6 @@ Next:
 	recordDataLength := int32(helpers.BytesToUint16(stream[point+2 : point+4]))
 	sPoint = point + 4
 
-
 	if bytes.Compare(recordNumber, record.AutofilterInfoRecord[:]) == 0 {
 		c := new(record.AutofilterInfo)
 		c.Read(stream[sPoint : sPoint+recordDataLength])
@@ -106,7 +108,7 @@ Next:
 		goto EIF
 	}
 
-	if bytes.Compare(recordNumber, []byte{0xFD,0x00}) == 0 {
+	if bytes.Compare(recordNumber, []byte{0xFD, 0x00}) == 0 {
 		//todo: сделать
 		goto EIF
 	}
@@ -214,7 +216,9 @@ EIF:
 		s.maxRow = s.maxRow - 1
 		s.rows = s.rows[1:s.maxRow]
 	}
-	s.rows = s.rows[:s.maxRow+1]
+	if len(s.rows) > 0 {
+		s.rows = s.rows[:s.maxRow+1]
+	}
 
 	return
 
@@ -244,7 +248,6 @@ func (s *sheet) addCell(cd structure.CellData, row [2]byte, column [2]byte) {
 		copy(newCols, s.rows[r].cols)
 		s.rows[r].cols = newCols
 	}
-
 
 	s.rows[r].cols[c].cell = cd
 
