@@ -9,16 +9,12 @@ import (
 )
 
 type rw struct {
-	cols []col
-}
-
-type col struct {
-	cell structure.CellData
+	cols map[int]structure.CellData
 }
 
 type sheet struct {
 	boundSheet    *record.BoundSheet
-	rows          []rw
+	rows          map[int]*rw
 	wb            *Workbook
 	maxCol        int // MaxCol index, countCol=MaxCol+1
 	maxRow        int // MaxRow index, countRow=MaxRow+1
@@ -31,33 +27,35 @@ func (s *sheet) GetName() (string) {
 
 // Get row by index
 
-func (s *sheet) GetRow(index int) (row rw, err error) {
+func (s *sheet) GetRow(index int) (row *rw, err error) {
 
-	if len(s.rows)-1 < index {
+	if row, ok:= s.rows[index]; ok {
+		return row , err
+	} else {
 		return row, errors.New("Out of range")
 	}
-	return s.rows[index], nil
 }
 
 func (rw *rw) GetCol(index int) (c structure.CellData, err error) {
-	if len(rw.cols)-1 < index {
-		return c, errors.New("Out of range")
-	}
 
-	if rw.cols[index].cell == nil {
+	if col, ok:=rw.cols[index]; ok {
+		return col, err
+	} else {
 		c = new(record.FakeBlank)
 		return c, nil
 	}
-	return rw.cols[index].cell, nil
+
+
+
 }
 
 func (rw *rw) GetCols() (cols []structure.CellData) {
 
-	for i:=0; i<=len(rw.cols)-1; i++  {
-		if rw.cols[i].cell == nil {
+	for i := 0; i <= len(rw.cols)-1; i++ {
+		if rw.cols[i] == nil {
 			cols = append(cols, new(record.FakeBlank))
 		} else {
-			cols = append(cols, rw.cols[i].cell)
+			cols = append(cols, rw.cols[i])
 		}
 	}
 
@@ -65,11 +63,12 @@ func (rw *rw) GetCols() (cols []structure.CellData) {
 }
 
 // Get all rows
-func (s *sheet) GetRows() (rows []rw) {
+func (s *sheet) GetRows() (rows []*rw) {
 
-	for i:=0; i<=len(s.rows)-1; i++  {
+	for i := 0; i <= len(s.rows)-1; i++ {
 		rows = append(rows, s.rows[i])
 	}
+
 	return rows
 }
 
@@ -80,15 +79,15 @@ func (s *sheet) GetNumberRows() (n int) {
 
 func (s *sheet) read(stream []byte) (err error) { // nolint: gocyclo
 
-	var point int32
-	point = int32(helpers.BytesToUint32(s.boundSheet.LbPlyPos[:]))
-	var sPoint int32
+	var point int64
+	point = int64(helpers.BytesToUint32(s.boundSheet.LbPlyPos[:]))
+	var sPoint int64
 
 	eof := false
 Next:
 
 	recordNumber := stream[point : point+2]
-	recordDataLength := int32(helpers.BytesToUint16(stream[point+2 : point+4]))
+	recordDataLength := int64(helpers.BytesToUint16(stream[point+2 : point+4]))
 	sPoint = point + 4
 
 	if bytes.Compare(recordNumber, record.AutofilterInfoRecord[:]) == 0 {
@@ -217,10 +216,7 @@ EIF:
 	// Trim empty  row and skip 0 rows with autofilters
 	if s.hasAutofilter {
 		s.maxRow = s.maxRow - 1
-		s.rows = s.rows[1:s.maxRow]
-	}
-	if len(s.rows) > 0 {
-		s.rows = s.rows[:s.maxRow+1]
+		delete(s.rows, 0)
 	}
 
 	return
@@ -230,28 +226,24 @@ EIF:
 func (s *sheet) addCell(cd structure.CellData, row [2]byte, column [2]byte) {
 
 	r := int(helpers.BytesToUint16(row[:]))
-
 	c := int(helpers.BytesToUint16(column[:]))
 
-	if s.maxCol < c {
-		s.maxCol = c
+	if s.rows == nil {
+		s.rows = map[int]*rw{}
 	}
-	if s.maxRow < r {
-		s.maxRow = r
+	if _, ok := s.rows[r]; !ok {
+		s.rows[r] = new(rw)
+
+		if _, ok := s.rows[r].cols[c]; !ok {
+
+			colVal := map[int]structure.CellData{}
+			colVal[c] = cd
+
+			s.rows[r].cols = colVal
+		}
+
 	}
 
-	if len(s.rows) < r+1 {
-		newRows := make([]rw, r+2000)
-		copy(newRows, s.rows)
-		s.rows = newRows
-	}
-
-	if len(s.rows[r].cols) < c+1 {
-		newCols := make([]col, c+1)
-		copy(newCols, s.rows[r].cols)
-		s.rows[r].cols = newCols
-	}
-
-	s.rows[r].cols[c].cell = cd
+	s.rows[r].cols[c] = cd
 
 }

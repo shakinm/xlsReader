@@ -40,7 +40,7 @@ func (r *LabelSSt) GetCol() [2]byte {
 }
 
 func (r *LabelSSt) GetString() string {
-	return r.sst.Rgb[helpers.BytesToUint16(r.isst[:])].String()
+	return r.sst.Rgb[helpers.BytesToUint32(r.isst[:])].String()
 }
 
 func (r *LabelSSt) GetFloat64() (fl float64) {
