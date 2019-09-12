@@ -53,13 +53,12 @@ func (rw *rw) GetCol(index int) (c structure.CellData, err error) {
 
 func (rw *rw) GetCols() (cols []structure.CellData) {
 
-	for _, c := range rw.cols {
-		if c.cell == nil {
+	for i:=0; i<=len(rw.cols)-1; i++  {
+		if rw.cols[i].cell == nil {
 			cols = append(cols, new(record.FakeBlank))
 		} else {
-			cols = append(cols, c.cell)
+			cols = append(cols, rw.cols[i].cell)
 		}
-
 	}
 
 	return cols
@@ -67,7 +66,11 @@ func (rw *rw) GetCols() (cols []structure.CellData) {
 
 // Get all rows
 func (s *sheet) GetRows() (rows []rw) {
-	return s.rows
+
+	for i:=0; i<=len(s.rows)-1; i++  {
+		rows = append(rows, s.rows[i])
+	}
+	return rows
 }
 
 // Get number of rows

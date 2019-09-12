@@ -90,21 +90,24 @@ func TestGetWorkBook(t *testing.T) {
 }
 
 func TestMiniFatWorkBook(t *testing.T) {
-	wb, err := OpenFile("./../testfie/parts.xls")
+	wb, err := OpenFile("./../testfie/只能导入‘(1)(1).xls")
 
 	if err != nil {
 		t.Error("Error: ", err)
 	}
-
+fmt.Println(wb.GetNumberSheets())
 	for i := 0; i <= wb.GetNumberSheets()-1; i++ {
+		fmt.Println(i)
+		fmt.Println(i)
 		sheet, _ := wb.GetSheet(i)
 
-		for _, row := range sheet.GetRows() {
+		 for _, row := range sheet.GetRows() {
+		 	fmt.Println(len(row.cols))
 
-			for _, col := range row.GetCols() {
-			fmt.Println(col.GetString())
+		 	for _, col := range row.GetCols() {
+		 	fmt.Println(col.GetString())
 
-			}
-		}
+		 	}
+		 }
 	}
 }
