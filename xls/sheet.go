@@ -51,7 +51,15 @@ func (rw *rw) GetCol(index int) (c structure.CellData, err error) {
 
 func (rw *rw) GetCols() (cols []structure.CellData) {
 
-	for i := 0; i <= len(rw.cols)-1; i++ {
+	var maxColKey int
+
+	for k, _ := range rw.cols {
+		if k>maxColKey {
+			maxColKey=k
+		}
+	}
+
+	for i := 0; i <= maxColKey; i++ {
 		if rw.cols[i] == nil {
 			cols = append(cols, new(record.FakeBlank))
 		} else {
@@ -154,8 +162,9 @@ Next:
 	if bytes.Compare(recordNumber, record.MulBlankRecord[:]) == 0 {
 		c := new(record.MulBlank)
 		c.Read(stream[sPoint : sPoint+recordDataLength])
-		for _, bl := range c.GetArrayBlRecord() {
-			s.addCell(&bl, bl.GetRow(), bl.GetCol())
+		blRecords := c.GetArrayBlRecord()
+		for i := 0; i <= len(blRecords)-1; i++ {
+			s.addCell(blRecords[i].Get(), blRecords[i].GetRow(), blRecords[i].GetCol())
 		}
 		goto EIF
 	}

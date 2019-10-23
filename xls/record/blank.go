@@ -60,3 +60,6 @@ func (r *Blank) GetXFIndex() int {
 	return int(helpers.BytesToUint16(r.ixfe[:]))
 }
 
+func (r *Blank) Get() *Blank {
+	return r
+}

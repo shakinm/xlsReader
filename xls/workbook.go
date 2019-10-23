@@ -112,8 +112,8 @@ Next:
 		wb.sst.NewSST(stream[sPoint : sPoint+recordDataLength])
 
 		wb.sst.Read(readType, grbit, prevLen)
-		totalSSt := helpers.BytesToUint16(wb.sst.CstTotal[:])
-		if recordDataLength >= 8224 || uint16(len(wb.sst.Rgb)) < totalSSt-1 {
+		totalSSt := helpers.BytesToUint32(wb.sst.CstTotal[:])
+		if recordDataLength >= 8224 || uint32(len(wb.sst.Rgb)) < totalSSt-1 {
 			SSTContinue = true
 		}
 		goto EIF

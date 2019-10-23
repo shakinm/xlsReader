@@ -91,3 +91,14 @@ type Formula struct {
 func (r *Formula) GetXFIndex() int {
 	return int(helpers.BytesToUint16(r.ixfe[:]))
 }
+
+func (r *Formula) Read(stream []byte) {
+	copy(r.rw[:], stream[:2])
+	copy(r.col[:], stream[2:4])
+	copy(r.ixfe[:], stream[4:6])
+	copy(r.num[:], stream[6:14])
+	copy(r.grbit[:], stream[14:16])
+	copy(r.chn[:], stream[16:20])
+	copy(r.cce[:], stream[20:22])
+	copy(r.rgce[:], stream[20:])
+}
