@@ -21,6 +21,11 @@ func (wb *Workbook) GetNumberSheets() int {
 	return len(wb.sheets)
 }
 
+// GetSheets - Get sheets in the workbook
+func (wb *Workbook) GetSheets() []sheet {
+	return wb.sheets
+}
+
 // GetSheet - Get sheet by ID
 func (wb *Workbook) GetSheet(sheetID int) (sheet *sheet, err error) { // nolint: golint
 
