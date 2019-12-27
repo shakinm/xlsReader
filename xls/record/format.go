@@ -49,18 +49,27 @@ func (r *Format) GetIndex() int {
 
 func (r *Format) GetFormatString(data structure.CellData) string {
 	if r.GetIndex() > 164 {
-		if data.GetType() == "*record.BoolErr" {
 
-		return data.GetString()
+		if data.GetType() == "*record.BoolErr" {
+			return data.GetString()
+		}
+		if data.GetType() == "*record.Rk" {
+			return fmt.Sprintf("%.2f", data.GetFloat64())
+		}
+
+		if data.GetType() == "*record.LabelSSt" {
+			return data.GetString()
 		}
 		if data.GetType() == "*record.Number" {
-			if strings.Contains(r.stFormat.String(), "0.00") {
+			if strings.Contains(r.stFormat.String(), "#") || strings.Contains(r.stFormat.String(), ".00") {
 				return fmt.Sprintf("%.2f", data.GetFloat64()*100) + "%"
 			}
 		}
+
 		if r.stFormat.String() == "General" {
 			return data.GetString()
 		}
+
 		t := helpers.TimeFromExcelTime(data.GetFloat64(), false)
 		dateFormat := strings.ReplaceAll(r.stFormat.String(), "HH:MM:SS", "hh:mm:ss")
 		dateFormat = strings.ReplaceAll(dateFormat, "\\", "")
@@ -68,7 +77,7 @@ func (r *Format) GetFormatString(data structure.CellData) string {
 	} else {
 		if data.GetType() == "*record.Number" {
 
-				return fmt.Sprintf("%.0f", data.GetFloat64())
+			return fmt.Sprintf("%.0f", data.GetFloat64())
 
 		}
 	}

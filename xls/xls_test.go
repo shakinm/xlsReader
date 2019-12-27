@@ -90,7 +90,7 @@ func TestGetWorkBook(t *testing.T) {
 }
 
 func TestMiniFatWorkBook(t *testing.T) {
-	wb, err := OpenFile("./../testfie/price (3).xls")
+	wb, err := OpenFile("./../testfie/izmestevzapgis-text.xls")
 
 	if err != nil {
 		t.Error("Error: ", err)
@@ -102,8 +102,21 @@ func TestMiniFatWorkBook(t *testing.T) {
 		if sheet.GetRows() != nil {
 			for _, row := range sheet.GetRows() {
 				if row  != nil {
+
 					for _, col := range row.GetCols() {
-						fmt.Println(col.GetString())
+
+					//	fmt.Println(col.GetString())
+						xf := col.GetXFIndex()
+						//fmt.Println(xf)
+						style := wb.GetXFbyIndex(xf)
+						//fmt.Println(style)
+						formatIdx := style.GetFormatIndex()
+						//fmt.Println(formatIdx)
+						format := wb.GetFormatByIndex(formatIdx)
+						//fmt.Println(format)
+
+						fstr := format.GetFormatString(col)
+						fmt.Println(fstr)
 
 					}
 				}
