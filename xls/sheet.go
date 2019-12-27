@@ -72,9 +72,8 @@ func (rw *rw) GetCols() (cols []structure.CellData) {
 
 // Get all rows
 func (s *sheet) GetRows() (rows []*rw) {
-
-	for i := 0; i <= len(s.rows)-1; i++ {
-		rows = append(rows, s.rows[i])
+	for _, v := range s.rows {
+		rows = append(rows, v)
 	}
 
 	return rows
