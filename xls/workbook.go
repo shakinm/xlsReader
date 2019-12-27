@@ -38,6 +38,9 @@ func (wb *Workbook) GetSheet(sheetID int) (sheet *sheet, err error) { // nolint:
 
 // GetXF -  Return Extended Format Record by index
 func (wb *Workbook) GetXFbyIndex(index int) record.XF {
+	if len(wb.xf)<index {
+		return wb.xf[15]
+	}
 	return wb.xf[index]
 }
 
