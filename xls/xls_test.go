@@ -90,12 +90,12 @@ func TestGetWorkBook(t *testing.T) {
 }
 
 func TestMiniFatWorkBook(t *testing.T) {
-	wb, err := OpenFile("./../testfie/ch3sheet.xls")
+	wb, err := OpenFile("./../testfie/price (3).xls")
 
 	if err != nil {
 		t.Error("Error: ", err)
 	}
-	fmt.Println(wb.GetNumberSheets())
+
 	for i := 0; i <= wb.GetNumberSheets()-1; i++ {
 
 		sheet, _ := wb.GetSheet(i)

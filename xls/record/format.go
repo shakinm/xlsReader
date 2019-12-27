@@ -65,6 +65,12 @@ func (r *Format) GetFormatString(data structure.CellData) string {
 		dateFormat := strings.ReplaceAll(r.stFormat.String(), "HH:MM:SS", "hh:mm:ss")
 		dateFormat = strings.ReplaceAll(dateFormat, "\\", "")
 		return fmtdate.Format(dateFormat, t)
+	} else {
+		if data.GetType() == "*record.Number" {
+
+				return fmt.Sprintf("%.0f", data.GetFloat64())
+
+		}
 	}
 	return data.GetString()
 }
