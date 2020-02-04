@@ -5,6 +5,7 @@ import (
 	"github.com/metakeule/fmtdate"
 	"github.com/shakinm/xlsReader/helpers"
 	"github.com/shakinm/xlsReader/xls/structure"
+	"strconv"
 	"strings"
 )
 
@@ -68,7 +69,7 @@ func (r *Format) GetFormatString(data structure.CellData) string {
 
 		if data.GetType() == "*record.Number" || data.GetType() == "*record.Rk"  {
 			if r.stFormat.String() == "General" || r.stFormat.String() == "@" {
-				return fmt.Sprintf("%.f", data.GetFloat64())
+				return strconv.FormatFloat( data.GetFloat64(), 'f', -1, 64)
 			}  else if strings.Contains(r.stFormat.String(), "%") {
 				return fmt.Sprintf("%.2f", data.GetFloat64()*100) + "%"
 			} else if  strings.Contains(r.stFormat.String(), "#") || strings.Contains(r.stFormat.String(), ".00") {
@@ -90,7 +91,7 @@ func (r *Format) GetFormatString(data structure.CellData) string {
 
 	} else {
 		if data.GetType() == "*record.Number" {
-			return fmt.Sprintf("%.0f", data.GetFloat64())
+			return strconv.FormatFloat( data.GetFloat64(), 'f', -1, 64)
 		}
 	}
 	return data.GetString()
