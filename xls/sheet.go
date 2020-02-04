@@ -21,7 +21,7 @@ type sheet struct {
 	hasAutofilter bool
 }
 
-func (s *sheet) GetName() (string) {
+func (s *sheet) GetName() string {
 	return s.boundSheet.Rgch.String()
 }
 
@@ -29,8 +29,8 @@ func (s *sheet) GetName() (string) {
 
 func (s *sheet) GetRow(index int) (row *rw, err error) {
 
-	if row, ok:= s.rows[index]; ok {
-		return row , err
+	if row, ok := s.rows[index]; ok {
+		return row, err
 	} else {
 		return row, errors.New("Out of range")
 	}
@@ -38,14 +38,12 @@ func (s *sheet) GetRow(index int) (row *rw, err error) {
 
 func (rw *rw) GetCol(index int) (c structure.CellData, err error) {
 
-	if col, ok:=rw.cols[index]; ok {
+	if col, ok := rw.cols[index]; ok {
 		return col, err
 	} else {
 		c = new(record.FakeBlank)
 		return c, nil
 	}
-
-
 
 }
 
@@ -54,8 +52,8 @@ func (rw *rw) GetCols() (cols []structure.CellData) {
 	var maxColKey int
 
 	for k, _ := range rw.cols {
-		if k>maxColKey {
-			maxColKey=k
+		if k > maxColKey {
+			maxColKey = k
 		}
 	}
 
@@ -89,7 +87,6 @@ func (s *sheet) read(stream []byte) (err error) { // nolint: gocyclo
 	var point int64
 	point = int64(helpers.BytesToUint32(s.boundSheet.LbPlyPos[:]))
 	var sPoint int64
-
 	eof := false
 Next:
 
@@ -113,6 +110,14 @@ Next:
 	if bytes.Compare(recordNumber, record.LabelSStRecord[:]) == 0 {
 		c := new(record.LabelSSt)
 		c.Read(stream[sPoint:sPoint+recordDataLength], &s.wb.sst)
+		s.addCell(c, c.GetRow(), c.GetCol())
+		goto EIF
+	}
+
+	//LABEL - Cell Value, String Constant
+	if bytes.Compare(recordNumber, record.LabelRecord[:]) == 0 {
+		c := new(record.Label)
+		c.Read(stream[sPoint : sPoint+recordDataLength])
 		s.addCell(c, c.GetRow(), c.GetCol())
 		goto EIF
 	}
