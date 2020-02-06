@@ -20,7 +20,7 @@ Offset		Field Name		Size		Contents
 											=08 BIFF5/BIFF7/BIFF8
 1			bof				1			09h
 
- */
+*/
 
 type bof struct {
 	vers byte

@@ -54,6 +54,9 @@ func (r *Format) GetFormatString(data structure.CellData) string {
 		if data.GetType() == "*record.LabelSSt" {
 			return data.GetString()
 		}
+		if data.GetType() == "*record.Label" {
+			return data.GetString()
+		}
 
 		if data.GetType() == "*record.FakeBlank" {
 			return data.GetString()
