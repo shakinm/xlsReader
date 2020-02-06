@@ -12,22 +12,22 @@ type rw struct {
 	cols map[int]structure.CellData
 }
 
-type sheet struct {
+type Sheet struct {
 	boundSheet    *record.BoundSheet
 	rows          map[int]*rw
 	wb            *Workbook
-	maxCol        int // MaxCol index, countCol=MaxCol+1
-	maxRow        int // MaxRow index, countRow=MaxRow+1
+	maxCol        int // maxCol index, countCol=maxCol+1
+	maxRow        int // maxRow index, countRow=maxRow+1
 	hasAutofilter bool
 }
 
-func (s *sheet) GetName() string {
+func (s *Sheet) GetName() string {
 	return s.boundSheet.Rgch.String()
 }
 
 // Get row by index
 
-func (s *sheet) GetRow(index int) (row *rw, err error) {
+func (s *Sheet) GetRow(index int) (row *rw, err error) {
 
 	if row, ok := s.rows[index]; ok {
 		return row, err
@@ -69,7 +69,7 @@ func (rw *rw) GetCols() (cols []structure.CellData) {
 }
 
 // Get all rows
-func (s *sheet) GetRows() (rows []*rw) {
+func (s *Sheet) GetRows() (rows []*rw) {
 	for _, v := range s.rows {
 		rows = append(rows, v)
 	}
@@ -78,11 +78,11 @@ func (s *sheet) GetRows() (rows []*rw) {
 }
 
 // Get number of rows
-func (s *sheet) GetNumberRows() (n int) {
+func (s *Sheet) GetNumberRows() (n int) {
 	return len(s.rows)
 }
 
-func (s *sheet) read(stream []byte) (err error) { // nolint: gocyclo
+func (s *Sheet) read(stream []byte) (err error) { // nolint: gocyclo
 
 	var point int64
 	point = int64(helpers.BytesToUint32(s.boundSheet.LbPlyPos[:]))
@@ -236,7 +236,7 @@ EIF:
 
 }
 
-func (s *sheet) addCell(cd structure.CellData, row [2]byte, column [2]byte) {
+func (s *Sheet) addCell(cd structure.CellData, row [2]byte, column [2]byte) {
 
 	r := int(helpers.BytesToUint16(row[:]))
 	c := int(helpers.BytesToUint16(column[:]))

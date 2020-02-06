@@ -90,7 +90,7 @@ func TestGetWorkBook(t *testing.T) {
 }
 
 func TestMiniFatWorkBook(t *testing.T) {
-	wb, err := OpenFile("./../testfie/123312.xls")
+	wb, err := OpenFile("./../testfie/table.xls")
 
 	if err != nil {
 		t.Error("Error: ", err)
