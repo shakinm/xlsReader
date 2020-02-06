@@ -116,9 +116,16 @@ Next:
 
 	//LABEL - Cell Value, String Constant
 	if bytes.Compare(recordNumber, record.LabelRecord[:]) == 0 {
-		c := new(record.Label)
-		c.Read(stream[sPoint : sPoint+recordDataLength])
-		s.addCell(c, c.GetRow(), c.GetCol())
+		if bytes.Compare(s.wb.vers[:], record.FlagBIFF8) == 0 {
+			c := new(record.LabelBIFF8)
+			c.Read(stream[sPoint : sPoint+recordDataLength])
+			s.addCell(c, c.GetRow(), c.GetCol())
+		} else {
+			c := new(record.LabelBIFF5)
+			c.Read(stream[sPoint : sPoint+recordDataLength])
+			s.addCell(c, c.GetRow(), c.GetCol())
+		}
+
 		goto EIF
 	}
 

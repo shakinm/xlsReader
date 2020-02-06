@@ -2,7 +2,9 @@ package record
 
 import (
 	"github.com/shakinm/xlsReader/helpers"
+	"golang.org/x/text/encoding/charmap"
 	"reflect"
+	"strings"
 	"unicode/utf16"
 )
 
@@ -26,7 +28,7 @@ Offset		Field Name		Size		Contents
 13			rgb				var			Array of string characters
 */
 
-type Label struct {
+type LabelBIFF8 struct {
 	rw    [2]byte
 	col   [2]byte
 	ixfe  [2]byte
@@ -35,52 +37,103 @@ type Label struct {
 	rgb   []byte
 }
 
-func (r *Label) GetRow() [2]byte {
+type LabelBIFF5 struct {
+	rw   [2]byte
+	col  [2]byte
+	ixfe [2]byte
+	cch  [2]byte
+	rgb  []byte
+}
+
+func (r *LabelBIFF8) GetRow() [2]byte {
 	return r.rw
 }
 
-func (r *Label) GetCol() [2]byte {
+func (r *LabelBIFF8) GetCol() [2]byte {
 	return r.col
 }
 
-func (r *Label) GetString() string {
-	//if 	r.grbit[:]<<=1 {
+func (r *LabelBIFF8) GetString() string {
+	if int(r.grbit[0]) == 1 {
 		name := helpers.BytesToUints16(r.rgb[:])
 		runes := utf16.Decode(name)
 		return string(runes)
-	//} else {
-	//
-	//	return string(r.rgb[:])
-	//}
+	} else {
+		return string(r.rgb[:])
+	}
 }
 
-func (r *Label) GetFloat64() (fl float64) {
+func (r *LabelBIFF8) GetFloat64() (fl float64) {
 	return fl
 }
-func (r *Label) GetInt64() (in int64) {
+func (r *LabelBIFF8) GetInt64() (in int64) {
 	return in
 }
 
-func (r *Label) GetType() string {
+func (r *LabelBIFF8) GetType() string {
 	return reflect.TypeOf(r).String()
 }
 
-func (r *Label) GetXFIndex() int {
+func (r *LabelBIFF8) GetXFIndex() int {
 	return int(helpers.BytesToUint16(r.ixfe[:]))
 }
 
-func (r *Label) Read(stream []byte) {
+func (r *LabelBIFF8) Read(stream []byte) {
 
 	copy(r.rw[:], stream[:2])
 	copy(r.col[:], stream[2:4])
 	copy(r.ixfe[:], stream[4:6])
 	copy(r.cch[:], stream[6:8])
 	copy(r.grbit[:], stream[8:9])
-	if int(r.grbit[0]) ==1 {
-		r.rgb=make([]byte, helpers.BytesToUint16(r.cch[:])*2)
+	if int(r.grbit[0]) == 1 {
+		r.rgb = make([]byte, helpers.BytesToUint16(r.cch[:])*2)
 	} else {
-		r.rgb=make([]byte, helpers.BytesToUint16(r.cch[:]))
+		r.rgb = make([]byte, helpers.BytesToUint16(r.cch[:]))
 	}
 
 	copy(r.rgb[:], stream[9:])
+}
+
+func (r *LabelBIFF5) GetRow() [2]byte {
+	return r.rw
+}
+
+func (r *LabelBIFF5) GetCol() [2]byte {
+	return r.col
+}
+
+func (r *LabelBIFF5) GetString() string {
+	strLen := helpers.BytesToUint16(r.cch[:])
+	return strings.TrimSpace(string(decodeWindows1251(r.rgb[:int(strLen)])))
+}
+
+func (r *LabelBIFF5) GetFloat64() (fl float64) {
+	return fl
+}
+func (r *LabelBIFF5) GetInt64() (in int64) {
+	return in
+}
+
+func (r *LabelBIFF5) GetType() string {
+	return reflect.TypeOf(r).String()
+}
+
+func (r *LabelBIFF5) GetXFIndex() int {
+	return int(helpers.BytesToUint16(r.ixfe[:]))
+}
+
+func (r *LabelBIFF5) Read(stream []byte) {
+
+	copy(r.rw[:], stream[:2])
+	copy(r.col[:], stream[2:4])
+	copy(r.ixfe[:], stream[4:6])
+	copy(r.cch[:], stream[6:8])
+	r.rgb = make([]byte, helpers.BytesToUint16(r.cch[:]))
+	copy(r.rgb[:], stream[8:])
+}
+
+func decodeWindows1251(ba []uint8) []uint8 {
+	dec := charmap.Windows1251.NewDecoder()
+	out, _ := dec.Bytes(ba)
+	return out
 }

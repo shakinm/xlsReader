@@ -14,6 +14,7 @@ type Workbook struct {
 	sst      record.SST
 	xf       []record.XF
 	formats  map[int]record.Format
+	vers     [2]byte
 }
 
 // GetNumberSheets - Number of sheets in the workbook
@@ -154,6 +155,11 @@ Next:
 	//EOF
 	if bytes.Compare(recordNumber, record.EOFRecord[:]) == 0 && recordDataLength == 0 {
 		eof = true
+	}
+
+	if bytes.Compare(recordNumber, record.BOFMARKS[:]) == 0   {
+		copy(wb.vers[:], stream[sPoint : sPoint+2])
+		goto EIF
 	}
 
 EIF:
