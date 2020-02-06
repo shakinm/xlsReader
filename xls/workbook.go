@@ -9,7 +9,7 @@ import (
 
 // Workbook struct
 type Workbook struct {
-	sheets   []sheet
+	sheets   []Sheet
 	codepage record.CodePage
 	sst      record.SST
 	xf       []record.XF
@@ -22,18 +22,18 @@ func (wb *Workbook) GetNumberSheets() int {
 }
 
 // GetSheets - Get sheets in the workbook
-func (wb *Workbook) GetSheets() []sheet {
+func (wb *Workbook) GetSheets() []Sheet {
 	return wb.sheets
 }
 
-// GetSheet - Get sheet by ID
-func (wb *Workbook) GetSheet(sheetID int) (sheet *sheet, err error) { // nolint: golint
+// GetSheet - Get Sheet by ID
+func (wb *Workbook) GetSheet(sheetID int) (sheet *Sheet, err error) { // nolint: golint
 
 	if len(wb.sheets) >= 1 && len(wb.sheets) >= sheetID {
 		return &wb.sheets[sheetID], err
 	}
 
-	return nil, errors.New("error. sheet not found")
+	return nil, errors.New("error. Sheet not found")
 }
 
 // GetXF -  Return Extended Format Record by index
@@ -54,7 +54,7 @@ func (wb *Workbook) GetCodePage() record.CodePage {
 	return wb.codepage
 }
 
-func (wb *Workbook) addSheet(bs *record.BoundSheet) (sheet sheet) { // nolint: golint
+func (wb *Workbook) addSheet(bs *record.BoundSheet) (sheet Sheet) { // nolint: golint
 	sheet.boundSheet = bs
 	sheet.wb = wb
 	wb.sheets = append(wb.sheets, sheet)
