@@ -177,9 +177,6 @@ func (cfb *Cfb) getFatSectors() (err error) { // nolint: gocyclo
 
 		cfb.difatPositions = append(cfb.difatPositions, sector.values(EntrySize)...)
 
-		if err != nil {
-			return err
-		}
 
 	}
 
@@ -319,7 +316,7 @@ func (cfb *Cfb) sectorOffset(sid uint32) uint32 {
 func (cfb *Cfb) calculateMiniFatOffset(sectorID []byte) (n uint32) {
 
 	if len(sectorID) == 4 {
-		n = uint32(helpers.BytesToUint32(sectorID))
+		n = helpers.BytesToUint32(sectorID)
 	}
 	if len(sectorID) == 2 {
 		n = uint32(binary.LittleEndian.Uint16(sectorID))
@@ -330,7 +327,7 @@ func (cfb *Cfb) calculateMiniFatOffset(sectorID []byte) (n uint32) {
 func (cfb *Cfb) calculateOffset(sectorID []byte) (n uint32) {
 
 	if len(sectorID) == 4 {
-		n = uint32(helpers.BytesToUint32(sectorID))
+		n = helpers.BytesToUint32(sectorID)
 	}
 	if len(sectorID) == 2 {
 		n = uint32(binary.LittleEndian.Uint16(sectorID))
