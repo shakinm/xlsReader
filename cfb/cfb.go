@@ -132,8 +132,9 @@ func (cfb *Cfb) getDirectories() (err error) {
 
 func (cfb *Cfb) getMiniFATSectors() (err error) {
 
-	position := cfb.calculateOffset(cfb.header.FirstMiniFATSectorLocation[:])
 	var section = make([]byte, 0)
+
+	position := cfb.calculateOffset(cfb.header.FirstMiniFATSectorLocation[:])
 
 	for i := uint32(0); i < helpers.BytesToUint32(cfb.header.NumberMiniFATSectors[:]); i++ {
 		sector := NewSector(&cfb.header)
@@ -143,14 +144,14 @@ func (cfb *Cfb) getMiniFATSectors() (err error) {
 			return err
 		}
 
-		for _, value := range sector.getFATSectorLocations() {
+		for _, value := range sector.getMiniFatFATSectorLocations() {
 			section = append(section, value)
 			if len(section) == 4 {
 				cfb.miniFatPositions = append(cfb.miniFatPositions, helpers.BytesToUint32(section))
 				section = make([]byte, 0)
 			}
 		}
-		position = cfb.calculateOffset(sector.getNextDIFATSectorLocation())
+		position = position + sector.SectorSize
 	}
 
 	return
@@ -176,7 +177,6 @@ func (cfb *Cfb) getFatSectors() (err error) { // nolint: gocyclo
 		}
 
 		cfb.difatPositions = append(cfb.difatPositions, sector.values(EntrySize)...)
-
 
 	}
 
@@ -218,13 +218,14 @@ func (cfb *Cfb) getFatSectors() (err error) { // nolint: gocyclo
 
 	return
 }
-func (cfb *Cfb) getDataFromMiniFat(starPos uint32) (data []byte, err error) {
-	starPos = uint32(starPos*512 + 512)
-	offset:=uint32(0)
-	for {
-		sector := NewMiniFatSector(&cfb.header)
+func (cfb *Cfb) getDataFromMiniFat(miniFatSectorLocation uint32, offset uint32) (data []byte, err error) {
 
-		point := starPos+(offset*64)
+	sPoint := cfb.sectorOffset(miniFatSectorLocation)
+	point := sPoint + cfb.calculateMiniFatOffset(offset)
+
+	for {
+
+		sector := NewMiniFatSector(&cfb.header)
 
 		err = cfb.getData(point, &sector.Data)
 
@@ -233,16 +234,20 @@ func (cfb *Cfb) getDataFromMiniFat(starPos uint32) (data []byte, err error) {
 		}
 
 		data = append(data, sector.Data...)
-		offset = cfb.miniFatPositions[offset]
 
-		if offset == helpers.BytesToUint32(ENDOFCHAIN) {
+		if cfb.miniFatPositions[offset] == helpers.BytesToUint32(ENDOFCHAIN) {
 			break
 		}
+
+		offset = cfb.miniFatPositions[offset]
+
+		point = sPoint + cfb.calculateMiniFatOffset(offset)
 
 	}
 
 	return data, err
 }
+
 func (cfb *Cfb) getDataFromFatChain(offset uint32) (data []byte, err error) {
 
 	for {
@@ -270,7 +275,7 @@ func (cfb *Cfb) OpenObject(object *Directory, root *Directory) (reader io.ReadSe
 
 	if helpers.BytesToUint32(object.StreamSize[:]) < uint32(helpers.BytesToUint16(cfb.header.MiniStreamCutoffSize[:])) {
 
-		data, err := cfb.getDataFromMiniFat(root.GetStartingSectorLocation())
+		data, err := cfb.getDataFromMiniFat(root.GetStartingSectorLocation(), object.GetStartingSectorLocation())
 
 		if err != nil {
 			return reader, err
@@ -313,15 +318,9 @@ func (cfb *Cfb) sectorOffset(sid uint32) uint32 {
 	return (sid + 1) * cfb.header.sectorSize()
 }
 
-func (cfb *Cfb) calculateMiniFatOffset(sectorID []byte) (n uint32) {
+func (cfb *Cfb) calculateMiniFatOffset(sid uint32) (n uint32) {
 
-	if len(sectorID) == 4 {
-		n = helpers.BytesToUint32(sectorID)
-	}
-	if len(sectorID) == 2 {
-		n = uint32(binary.LittleEndian.Uint16(sectorID))
-	}
-	return n * 64
+	return sid * 64
 }
 
 func (cfb *Cfb) calculateOffset(sectorID []byte) (n uint32) {
