@@ -42,6 +42,7 @@ type LabelBIFF5 struct {
 	col  [2]byte
 	ixfe [2]byte
 	cch  [2]byte
+	grbit [1]byte
 	rgb  []byte
 }
 
@@ -59,7 +60,7 @@ func (r *LabelBIFF8) GetString() string {
 		runes := utf16.Decode(name)
 		return string(runes)
 	} else {
-		return string(r.rgb[:])
+		return string(decodeWindows1251(r.rgb[:]))
 	}
 }
 
@@ -128,6 +129,7 @@ func (r *LabelBIFF5) Read(stream []byte) {
 	copy(r.col[:], stream[2:4])
 	copy(r.ixfe[:], stream[4:6])
 	copy(r.cch[:], stream[6:8])
+	//copy(r.grbit[:], stream[8:9])
 	r.rgb = make([]byte, helpers.BytesToUint16(r.cch[:]))
 	copy(r.rgb[:], stream[8:])
 }

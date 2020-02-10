@@ -55,6 +55,11 @@ func (wb *Workbook) GetCodePage() record.CodePage {
 	return wb.codepage
 }
 
+// GetVersionBIFF - version BIFF
+func (wb *Workbook) GetVersionBIFF() []byte {
+	return wb.vers[:]
+}
+
 func (wb *Workbook) addSheet(bs *record.BoundSheet) (sheet Sheet) { // nolint: golint
 	sheet.boundSheet = bs
 	sheet.wb = wb
@@ -89,7 +94,6 @@ Next:
 	if bytes.Compare(recordNumber, record.BoundSheetRecord[:]) == 0 {
 		var bs record.BoundSheet
 		bs.Read(stream[sPoint+grbitOffset : sPoint+recordDataLength])
-		//err = binary.Read(bytes.NewBuffer(stream[sPoint:sPoint+recordDataLength]), binary.LittleEndian, &bs)
 		_ = wb.addSheet(&bs)
 		goto EIF
 	}
@@ -137,7 +141,8 @@ Next:
 
 	if bytes.Compare(recordNumber, record.FormatRecord[:]) == 0 {
 		format := new(record.Format)
-		format.Read(stream[sPoint : sPoint+recordDataLength])
+
+		format.Read(stream[sPoint : sPoint+recordDataLength], wb.vers[:])
 
 		if wb.formats==nil {
 			wb.formats = make(map[int]record.Format,0)

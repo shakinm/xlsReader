@@ -1,6 +1,7 @@
 package record
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/metakeule/fmtdate"
 	"github.com/shakinm/xlsReader/helpers"
@@ -36,14 +37,40 @@ see "XF".
 
 type Format struct {
 	ifmt     [2]byte
+	cch      [2]byte
+	grbit    [1]byte
+	rgb      []byte
+	vers     []byte
 	stFormat structure.XLUnicodeRichExtendedString
 }
 
-func (r *Format) Read(stream []byte) {
-	copy(r.ifmt[:], stream[0:2])
-	r.stFormat.Read(stream[2:])
+func (r *Format) Read(stream []byte, vers []byte) {
+
+	r.vers = vers
+
+	if bytes.Compare(vers, FlagBIFF8) == 0 {
+		copy(r.ifmt[:], stream[0:2])
+		r.stFormat.Read(stream[2:])
+	} else {
+		copy(r.ifmt[:], stream[:2])
+		copy(r.cch[:], stream[2:4])
+		copy(r.grbit[:], stream[4:4])
+		r.rgb = make([]byte, helpers.BytesToUint16(r.cch[:]))
+		copy(r.rgb[:], stream[5:])
+	}
 
 }
+
+func (r *Format) String() string {
+
+	if bytes.Compare(r.vers, FlagBIFF8) == 0 {
+		return r.stFormat.String()
+	}
+	strLen := helpers.BytesToUint16(r.cch[:])
+	return strings.TrimSpace(string(decodeWindows1251(bytes.Trim(r.rgb[:int(strLen)], "\x00"))))
+
+}
+
 func (r *Format) GetIndex() int {
 	return int(helpers.BytesToUint16(r.ifmt[:]))
 }
@@ -70,31 +97,30 @@ func (r *Format) GetFormatString(data structure.CellData) string {
 			return data.GetString()
 		}
 
-		if data.GetType() == "*record.Number" || data.GetType() == "*record.Rk"  {
-			if r.stFormat.String() == "General" || r.stFormat.String() == "@" {
-				return strconv.FormatFloat( data.GetFloat64(), 'f', -1, 64)
-			}  else if strings.Contains(r.stFormat.String(), "%") {
+		if data.GetType() == "*record.Number" || data.GetType() == "*record.Rk" {
+			if r.String() == "General" || r.String() == "@" {
+				return strconv.FormatFloat(data.GetFloat64(), 'f', -1, 64)
+			} else if strings.Contains(r.String(), "%") {
 				return fmt.Sprintf("%.2f", data.GetFloat64()*100) + "%"
-			} else if  strings.Contains(r.stFormat.String(), "#") || strings.Contains(r.stFormat.String(), ".00") {
+			} else if strings.Contains(r.String(), "#") || strings.Contains(r.String(), ".00") {
 				return fmt.Sprintf("%.2f", data.GetFloat64())
-			}else if strings.Contains(r.stFormat.String(), "0") {
+			} else if strings.Contains(r.String(), "0") {
 				return fmt.Sprintf("%.f", data.GetFloat64())
 			} else {
-				fmt.Println(r.stFormat.String())
+				fmt.Println(r.String())
 				t := helpers.TimeFromExcelTime(data.GetFloat64(), false)
-				dateFormat := strings.ReplaceAll(r.stFormat.String(), "HH:MM:SS", "hh:mm:ss")
+				dateFormat := strings.ReplaceAll(r.String(), "HH:MM:SS", "hh:mm:ss")
 				dateFormat = strings.ReplaceAll(dateFormat, "\\", "")
 				return fmtdate.Format(dateFormat, t)
 			}
 
 		}
 
-
 		return data.GetString()
 
 	} else {
 		if data.GetType() == "*record.Number" {
-			return strconv.FormatFloat( data.GetFloat64(), 'f', -1, 64)
+			return strconv.FormatFloat(data.GetFloat64(), 'f', -1, 64)
 		}
 	}
 	return data.GetString()

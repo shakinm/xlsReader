@@ -42,7 +42,7 @@ Bits 	Mask 		Flag Name 		Contents
 31–9 	FFFFFE00 					(Reserved) Reserved; must be 0 (zero)
 
 */
-var FlagBIFF8 = []byte{0x06, 0x00}
+var FlagBIFF8 = []byte{0x00, 0x06}
 
 type biff8 struct {
 	vers     [2]byte
@@ -53,7 +53,7 @@ type biff8 struct {
 	sfo      [4]byte
 }
 
-var FlagBIFF5 = []byte{0x05, 0x00}
+var FlagBIFF5 = []byte{0x00, 0x06}
 
 type biff5 struct {
 	vers     [2]byte
