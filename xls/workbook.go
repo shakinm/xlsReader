@@ -93,7 +93,7 @@ Next:
 
 	if bytes.Compare(recordNumber, record.BoundSheetRecord[:]) == 0 {
 		var bs record.BoundSheet
-		bs.Read(stream[sPoint+grbitOffset : sPoint+recordDataLength])
+		bs.Read(stream[sPoint+grbitOffset : sPoint+recordDataLength], wb.vers[:])
 		_ = wb.addSheet(&bs)
 		goto EIF
 	}

@@ -1,8 +1,9 @@
 package record
 
 import (
-	"github.com/shakinm/xlsReader/helpers"
+	"bytes"
 	"github.com/shakinm/xlsReader/xls/structure"
+	"strings"
 )
 
 //This record stores the sheet name, sheet type, and stream position
@@ -38,82 +39,35 @@ type BoundSheet struct {
 	LbPlyPos [4]byte
 	Grbit    [2]byte
 	Cch      [1]byte
-	Rgch     structure.XLUnicodeRichExtendedString
+	Rgch     []byte
+	stFormat structure.XLUnicodeRichExtendedString
+	vers     []byte
+
 }
 
-func (r *BoundSheet) Read(stream []byte) {
+func (r *BoundSheet) Read(stream []byte, vers []byte) {
 
-	var rgbSize uint8
-	oft := uint32(7)
+	r.vers = vers
 
 	copy(r.LbPlyPos[:], stream[0:4])
 	copy(r.Grbit[:], stream[4:6])
 	copy(r.Cch[:], stream[6:7])
 
-	//offset 2
-	r.Rgch.FHighByte = stream[iOft(&oft, 0):iOft(&oft, 1)][0]
+	if bytes.Compare(vers, FlagBIFF8) == 0 {
 
-	if r.Rgch.FHighByte&1 == 1 {
-		rgbSize = uint8(r.Cch[0]) * 2
+		fixedStream:=[]byte{r.Cch[0],0x00}
+		fixedStream = append(fixedStream, stream[7:]...)
+		r.stFormat.Read(fixedStream)
 
 	} else {
-		rgbSize = uint8(r.Cch[0])
-
+		r.Rgch = make([]byte, int(r.Cch[0]))
+		copy(r.Rgch[:], stream[7:])
 	}
-
-	if r.Rgch.FHighByte>>3&1 == 1 { // if fRichSt == 1
-
-		copy(r.Rgch.CRun[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
+}
+func (r *BoundSheet) GetName() string {
+	if bytes.Compare(r.vers, FlagBIFF8) == 0 {
+		return r.stFormat.String()
 	}
-
-	if r.Rgch.FHighByte>>2&1 == 1 { //fExtSt  == 1
-		//offset 4
-		copy(r.Rgch.CbExtRst[:], stream[iOft(&oft, 0):iOft(&oft, 4)])
-	}
-
-	//offset rgbSize
-	r.Rgch.Rgb = make([]byte, uint32(rgbSize))
-	copy(r.Rgch.Rgb[0:], stream[iOft(&oft, 0):iOft(&oft, uint32(rgbSize))])
-
-	if r.Rgch.FHighByte>>3&1 == 1 { // if fRichSt == 1
-		cRunSize := helpers.BytesToUint16(r.Rgch.CRun[:])
-		for i := uint16(0); i <= cRunSize-1; i++ {
-			var rgRun structure.FormatRun
-			copy(rgRun.Ich[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-			copy(rgRun.Ifnt.Ifnt[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-			r.Rgch.RgRun = append(r.Rgch.RgRun, rgRun)
-		}
-	}
-
-	if r.Rgch.FHighByte>>2&1 == 1 { //fExtSt  == 1
-		copy(r.Rgch.ExtRst.Reserved[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-		copy(r.Rgch.ExtRst.Cb[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-
-		copy(r.Rgch.ExtRst.Phs.Ifnt.Ifnt[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-		copy(r.Rgch.ExtRst.Phs.Info[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-
-		copy(r.Rgch.ExtRst.Rphssub.Crun[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-		copy(r.Rgch.ExtRst.Rphssub.Cch[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-
-		copy(r.Rgch.ExtRst.Rphssub.St.CchCharacters[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-
-		rgchDataSize := helpers.BytesToUint16(r.Rgch.ExtRst.Rphssub.St.CchCharacters[:]) * 2
-		for i := uint16(0); i <= rgchDataSize; i++ {
-			r.Rgch.ExtRst.Rphssub.St.RgchData = append(r.Rgch.ExtRst.Rphssub.St.RgchData, stream[iOft(&oft, 0):iOft(&oft, 2)]...)
-		}
-
-		//The number of elements in this array is rphssub.crun
-		phRunsSizeL := helpers.BytesToUint16(r.Rgch.ExtRst.Rphssub.Crun[:])
-		if phRunsSizeL > 0 {
-			for i := uint16(0); i <= phRunsSizeL; i++ {
-				var phRuns structure.PhRuns
-				copy(phRuns.IchFirst[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-				copy(phRuns.IchMom[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-				copy(phRuns.CchMom[:], stream[iOft(&oft, 0):iOft(&oft, 2)])
-
-				r.Rgch.ExtRst.Rgphruns = append(r.Rgch.ExtRst.Rgphruns, phRuns)
-			}
-		}
-	}
-
+	strLen := int(r.Cch[0])
+	return strings.TrimSpace(string(decodeWindows1251(bytes.Trim(r.Rgch[:int(strLen)], "\x00"))))
 }

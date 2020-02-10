@@ -22,7 +22,7 @@ type Sheet struct {
 }
 
 func (s *Sheet) GetName() string {
-	return s.boundSheet.Rgch.String()
+	return s.boundSheet.GetName()
 }
 
 // Get row by index
