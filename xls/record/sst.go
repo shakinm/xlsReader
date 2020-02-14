@@ -29,7 +29,8 @@ type SST struct {
 	CstUnique [4]byte
 	RgbSrc    []byte
 	Rgb       []structure.XLUnicodeRichExtendedString
-	i         int
+	chLen     int
+	ByteLen   int
 }
 
 func (s *SST) RgbAppend(bts []byte) (err error) {
@@ -47,6 +48,13 @@ func r() (err error) {
 	return
 }
 
+func abs(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
+}
+
 func (s *SST) Read(readType string, grbit byte, prevLen int32) () {
 
 	defer r()
@@ -60,89 +68,52 @@ func (s *SST) Read(readType string, grbit byte, prevLen int32) () {
 	for {
 
 		var _rgb structure.XLUnicodeRichExtendedString
-		var rgbSize uint16
+		var rgbSize int
 
-		//offset 2
-		copy(_rgb.Cch[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-		//offset 2
-		_rgb.FHighByte = s.RgbSrc[iOft(&oft, 0):iOft(&oft, 1)][0]
+		cch := int(helpers.BytesToUint16(s.RgbSrc[0:2]))
 
-		if _rgb.FHighByte&1 == 1 {
-			rgbSize = helpers.BytesToUint16(_rgb.Cch[:]) * 2
-			if readType == "continue" && prevLen > 0 && grbit == 0 {
-				rgbSize = rgbSize - (rgbSize-uint16(prevLen-3))/2
+		if readType != "continue" {
+			grbit = s.RgbSrc[2:3][0]
+		}
 
+		if readType == "continue" && prevLen == 0 && s.ByteLen == 0 {
+			grbit = s.RgbSrc[2:3][0]
+		}
+
+		readType = ""
+
+		if cch >= (len(s.RgbSrc)-3)/(1+int(grbit)) || s.ByteLen > 0 {
+
+			addBytesLen := (len(s.RgbSrc) - 3) - s.ByteLen
+
+			if cch-s.chLen > addBytesLen/(1+int(grbit)) {
+				s.chLen = s.chLen + addBytesLen/(1+int(grbit))
+				s.ByteLen = s.ByteLen + addBytesLen
+				return
+			} else {
+
+				s.ByteLen = s.ByteLen + (cch-s.chLen)*(1+int(grbit))
+				s.chLen = cch
+				rgbSize = s.ByteLen + 3
 			}
 
 		} else {
-			rgbSize = helpers.BytesToUint16(_rgb.Cch[:])
-			if readType == "continue" && prevLen > 0 && grbit == 1 {
-				rgbSize = uint16(prevLen-3) + (rgbSize-uint16(prevLen-3))*2
-			}
-		}
-		readType = ""
-
-		if _rgb.FHighByte>>3&1 == 1 { // if fRichSt == 1
-
-			copy(_rgb.CRun[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
+			rgbSize = cch*(1+int(grbit)) + 3
 		}
 
-		if _rgb.FHighByte>>2&1 == 1 { //fExtSt  == 1
-			//offset 4
-			copy(_rgb.CbExtRst[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 4)])
-		}
-
-		//offset rgbSize
-		_rgb.Rgb = make([]byte, uint32(rgbSize))
-		copy(_rgb.Rgb[0:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, uint32(rgbSize))])
-
-		if _rgb.FHighByte>>3&1 == 1 { // if fRichSt == 1
-			cRunSize := helpers.BytesToUint16(_rgb.CRun[:])
-			for i := uint16(0); i <= cRunSize-1; i++ {
-				var rgRun structure.FormatRun
-				copy(rgRun.Ich[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-				copy(rgRun.Ifnt.Ifnt[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-				_rgb.RgRun = append(_rgb.RgRun, rgRun)
-			}
-		}
-
-		if _rgb.FHighByte>>2&1 == 1 { //fExtSt  == 1
-			copy(_rgb.ExtRst.Reserved[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-			copy(_rgb.ExtRst.Cb[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-
-			copy(_rgb.ExtRst.Phs.Ifnt.Ifnt[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-			copy(_rgb.ExtRst.Phs.Info[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-
-			copy(_rgb.ExtRst.Rphssub.Crun[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-			copy(_rgb.ExtRst.Rphssub.Cch[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-
-			copy(_rgb.ExtRst.Rphssub.St.CchCharacters[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-
-			rgchDataSize := helpers.BytesToUint16(_rgb.ExtRst.Rphssub.St.CchCharacters[:]) * 2
-			for i := uint16(0); i <= rgchDataSize; i++ {
-				_rgb.ExtRst.Rphssub.St.RgchData = append(_rgb.ExtRst.Rphssub.St.RgchData, s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)]...)
-			}
-
-			////The number of elements in this array is rphssub.crun
-			phRunsSizeL := helpers.BytesToUint16(_rgb.ExtRst.Rphssub.Crun[:])
-			if phRunsSizeL > 0 {
-				for i := uint16(0); i <= phRunsSizeL; i++ {
-					var phRuns structure.PhRuns
-					copy(phRuns.IchFirst[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-					copy(phRuns.IchMom[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-					copy(phRuns.CchMom[:], s.RgbSrc[iOft(&oft, 0):iOft(&oft, 2)])
-
-					_rgb.ExtRst.Rgphruns = append(_rgb.ExtRst.Rgphruns, phRuns)
-				}
-			}
-		}
+		_rgb.Read(s.RgbSrc[iOft(&oft, 0):iOft(&oft, uint32(rgbSize))])
 
 		if len(s.RgbSrc) >= int(oft) {
-
 			s.Rgb = append(s.Rgb, _rgb)
-
 			s.RgbSrc = s.RgbSrc[int(oft):]
+			s.chLen = 0
+			s.ByteLen = 0
 			oft = 0
+
+			if len(s.RgbSrc) == 0 {
+				return
+			}
+
 		} else {
 			break
 		}

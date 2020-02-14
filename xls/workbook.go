@@ -104,12 +104,10 @@ Next:
 		if SSTContinue {
 			readType = "continue"
 
-			prevLen = int32(len(wb.sst.RgbSrc))
-
-			if prevLen != 0 {
-				grbitOffset = 1
-			} else {
+			if len(wb.sst.RgbSrc) == 0  {
 				grbitOffset = 0
+			} else {
+				grbitOffset = 1
 			}
 
 			grbit = stream[sPoint]
