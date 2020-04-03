@@ -79,7 +79,16 @@ func (s *Sheet) GetRows() (rows []*rw) {
 
 // Get number of rows
 func (s *Sheet) GetNumberRows() (n int) {
-	return len(s.rows)
+
+	var maxRowKey int
+
+	for k, _ := range s.rows {
+		if k > maxRowKey {
+			maxRowKey = k
+		}
+	}
+
+	return maxRowKey+1
 }
 
 func (s *Sheet) read(stream []byte) (err error) { // nolint: gocyclo

@@ -39,7 +39,7 @@ func (wb *Workbook) GetSheet(sheetID int) (sheet *Sheet, err error) { // nolint:
 
 // GetXF -  Return Extended Format Record by index
 func (wb *Workbook) GetXFbyIndex(index int) record.XF {
-	if len(wb.xf)<index {
+	if len(wb.xf)-1<index {
 		return wb.xf[15]
 	}
 	return wb.xf[index]
