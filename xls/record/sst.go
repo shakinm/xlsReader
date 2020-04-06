@@ -68,7 +68,6 @@ func (s *SST) Read(readType string, grbit byte, prevLen int32) () {
 	for {
 
 		var _rgb structure.XLUnicodeRichExtendedString
-		var rgbSize int
 
 		cch := int(helpers.BytesToUint16(s.RgbSrc[0:2]))
 
@@ -82,28 +81,21 @@ func (s *SST) Read(readType string, grbit byte, prevLen int32) () {
 
 		readType = ""
 
-		if cch >= (len(s.RgbSrc)-3)/(1+int(grbit)) || s.ByteLen > 0 {
+		addBytesLen := (len(s.RgbSrc) - 3) - s.ByteLen
 
-			addBytesLen := (len(s.RgbSrc) - 3) - s.ByteLen
-
-			if cch-s.chLen > addBytesLen/(1+int(grbit)) {
-				s.chLen = s.chLen + addBytesLen/(1+int(grbit))
-				s.ByteLen = s.ByteLen + addBytesLen
-				return
-			} else {
-
-				s.ByteLen = s.ByteLen + (cch-s.chLen)*(1+int(grbit))
-				s.chLen = cch
-				rgbSize = s.ByteLen + 3
-			}
-
+		if cch-s.chLen > addBytesLen/(1+int(grbit)) {
+			s.chLen = s.chLen + addBytesLen/(1+int(grbit))
+			s.ByteLen = s.ByteLen + addBytesLen
+			return
 		} else {
-			rgbSize = cch*(1+int(grbit)) + 3
+			s.ByteLen = s.ByteLen + (cch-s.chLen)*(1+int(grbit))
+			s.chLen = cch
 		}
 
-		_rgb.Read(s.RgbSrc[iOft(&oft, 0):iOft(&oft, uint32(rgbSize))])
+		realSize := _rgb.Read(s.RgbSrc[iOft(&oft, 0):])
+		iOft(&oft, realSize)
 
-		if len(s.RgbSrc) >= int(oft) {
+		if len(s.RgbSrc) >= int(realSize) {
 			s.Rgb = append(s.Rgb, _rgb)
 			s.RgbSrc = s.RgbSrc[int(oft):]
 			s.chLen = 0

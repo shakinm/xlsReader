@@ -36,7 +36,7 @@ type XLUnicodeRichExtendedString struct {
 	ExtRst ExtRst
 }
 
-func (s *XLUnicodeRichExtendedString) Read(stream []byte) {
+func (s *XLUnicodeRichExtendedString) Read(stream []byte)   uint32 {
 	var rgbSize uint16
 	oft := uint32(0)
 
@@ -107,6 +107,8 @@ func (s *XLUnicodeRichExtendedString) Read(stream []byte) {
 			}
 		}
 	}
+
+	return oft
 }
 
 func iOft(offset *uint32, inc uint32) uint32 {

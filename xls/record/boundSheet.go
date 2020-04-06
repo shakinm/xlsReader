@@ -57,7 +57,7 @@ func (r *BoundSheet) Read(stream []byte, vers []byte) {
 
 		fixedStream:=[]byte{r.Cch[0],0x00}
 		fixedStream = append(fixedStream, stream[7:]...)
-		r.stFormat.Read(fixedStream)
+		_ = r.stFormat.Read(fixedStream)
 
 	} else {
 		r.Rgch = make([]byte, int(r.Cch[0]))
