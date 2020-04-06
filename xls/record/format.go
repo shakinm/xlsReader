@@ -50,7 +50,7 @@ func (r *Format) Read(stream []byte, vers []byte) {
 
 	if bytes.Compare(vers, FlagBIFF8) == 0 {
 		copy(r.ifmt[:], stream[0:2])
-		r.stFormat.Read(stream[2:])
+		_ = r.stFormat.Read(stream[2:])
 	} else {
 		copy(r.ifmt[:], stream[:2])
 		copy(r.cch[:], stream[2:4])
