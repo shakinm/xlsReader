@@ -54,9 +54,8 @@ func (r *Format) Read(stream []byte, vers []byte) {
 	} else {
 		copy(r.ifmt[:], stream[:2])
 		copy(r.cch[:], stream[2:4])
-		copy(r.grbit[:], stream[4:4])
 		r.rgb = make([]byte, helpers.BytesToUint16(r.cch[:]))
-		copy(r.rgb[:], stream[5:])
+		copy(r.rgb[:], stream[4:])
 	}
 
 }
