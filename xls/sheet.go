@@ -2,7 +2,6 @@ package xls
 
 import (
 	"bytes"
-	"errors"
 	"github.com/shakinm/xlsReader/helpers"
 	"github.com/shakinm/xlsReader/xls/record"
 	"github.com/shakinm/xlsReader/xls/structure"
@@ -32,7 +31,9 @@ func (s *Sheet) GetRow(index int) (row *rw, err error) {
 	if row, ok := s.rows[index]; ok {
 		return row, err
 	} else {
-		return row, errors.New("Out of range")
+		r := new(rw)
+		r.cols = make(map[int]structure.CellData)
+		return r, nil
 	}
 }
 
@@ -70,8 +71,14 @@ func (rw *rw) GetCols() (cols []structure.CellData) {
 
 // Get all rows
 func (s *Sheet) GetRows() (rows []*rw) {
-	for _, v := range s.rows {
-		rows = append(rows, v)
+	for i := 0; i <= s.GetNumberRows()-1; i++ {
+		if s.rows[i] == nil {
+			r := new(rw)
+			r.cols = make(map[int]structure.CellData)
+			rows = append(rows, r)
+		} else {
+			rows = append(rows, s.rows[i])
+		}
 	}
 
 	return rows
@@ -88,7 +95,7 @@ func (s *Sheet) GetNumberRows() (n int) {
 		}
 	}
 
-	return maxRowKey+1
+	return maxRowKey + 1
 }
 
 func (s *Sheet) read(stream []byte) (err error) { // nolint: gocyclo
