@@ -50,7 +50,7 @@ func (r *Number) GetFloat() float64 {
 
 func (r *Number) GetString() string {
 
-	return strconv.FormatFloat(r.GetFloat(), 'f', 6, 64)
+	return strconv.FormatFloat(r.GetFloat(), 'f', -1, 64)
 }
 
 func (r *Number) GetFloat64() (fl float64) {
