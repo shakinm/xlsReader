@@ -14,7 +14,22 @@ func OpenFile(fileName string) (workbook Workbook, err error) {
 	if err != nil {
 		return workbook, err
 	}
+	return openCfb(adaptor)
+}
 
+// OpenReader - Open document from the file reader
+func OpenReader(fileReader io.ReadSeeker) (workbook Workbook, err error) {
+
+	adaptor, err := cfb.OpenReader(fileReader)
+
+	if err != nil {
+		return workbook, err
+	}
+	return openCfb(adaptor)
+}
+
+// OpenFile - Open document from the file
+func openCfb(adaptor cfb.Cfb) (workbook Workbook, err error) {
 	var book *cfb.Directory
 	var root *cfb.Directory
 	for _, dir := range adaptor.GetDirs() {
