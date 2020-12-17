@@ -2,10 +2,9 @@ package cfb
 
 import (
 	"encoding/binary"
+	"github.com/Alliera/xlsReader/helpers"
 	"unicode/utf16"
-	"github.com/shakinm/xlsReader/helpers"
 )
-
 
 // Directory - Compound File Directory Entry
 type Directory struct {
@@ -29,7 +28,7 @@ func (d *Directory) Name() string {
 
 	size := binary.LittleEndian.Uint16(d.DirectoryEntryNameLength[:])
 	if size > 0 {
-		size=size - 1
+		size = size - 1
 	}
 	name := helpers.BytesToUints16(d.DirectoryEntryName[:size])
 	runes := utf16.Decode(name)
@@ -47,4 +46,3 @@ func (d *Directory) GetStreamSize() uint32 {
 
 	return helpers.BytesToUint32(d.StreamSize[:])
 }
-

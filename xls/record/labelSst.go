@@ -1,7 +1,7 @@
 package record
 
 import (
-	"github.com/shakinm/xlsReader/helpers"
+	"github.com/Alliera/xlsReader/helpers"
 	"reflect"
 )
 
@@ -57,9 +57,6 @@ func (r *LabelSSt) GetType() string {
 func (r *LabelSSt) GetXFIndex() int {
 	return int(helpers.BytesToUint16(r.ixfe[:]))
 }
-
-
-
 
 func (r *LabelSSt) Read(stream []byte, sst *SST) {
 	r.sst = sst

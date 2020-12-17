@@ -1,8 +1,8 @@
 package record
 
 import (
-	"github.com/shakinm/xlsReader/helpers"
-	"github.com/shakinm/xlsReader/xls/structure"
+	"github.com/Alliera/xlsReader/helpers"
+	"github.com/Alliera/xlsReader/xls/structure"
 	"io"
 )
 
@@ -55,7 +55,7 @@ func abs(x int) int {
 	return x
 }
 
-func (s *SST) Read(readType string, grbit byte, prevLen int32) () {
+func (s *SST) Read(readType string, grbit byte, prevLen int32) {
 
 	defer r()
 

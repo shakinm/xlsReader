@@ -1,7 +1,7 @@
 package record
 
 import (
-	"github.com/shakinm/xlsReader/helpers"
+	"github.com/Alliera/xlsReader/helpers"
 	"reflect"
 	"strconv"
 )

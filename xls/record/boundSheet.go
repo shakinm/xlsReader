@@ -2,7 +2,7 @@ package record
 
 import (
 	"bytes"
-	"github.com/shakinm/xlsReader/xls/structure"
+	"github.com/Alliera/xlsReader/xls/structure"
 	"strings"
 )
 
@@ -42,7 +42,6 @@ type BoundSheet struct {
 	Rgch     []byte
 	stFormat structure.XLUnicodeRichExtendedString
 	vers     []byte
-
 }
 
 func (r *BoundSheet) Read(stream []byte, vers []byte) {
@@ -55,7 +54,7 @@ func (r *BoundSheet) Read(stream []byte, vers []byte) {
 
 	if bytes.Compare(vers, FlagBIFF8) == 0 {
 
-		fixedStream:=[]byte{r.Cch[0],0x00}
+		fixedStream := []byte{r.Cch[0], 0x00}
 		fixedStream = append(fixedStream, stream[7:]...)
 		_ = r.stFormat.Read(fixedStream)
 

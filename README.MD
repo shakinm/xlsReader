@@ -4,7 +4,7 @@
 
 ## Установка / Installation
 
-`$ go get github.com/shakinm/xlsReader`
+`$ go get github.com/Alliera/xlsReader`
 
 ## Использование / Using
 
@@ -13,7 +13,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/shakinm/xlsReader/xls"
+	"github.com/Alliera/xlsReader/xls"
 	"log"
 )
 

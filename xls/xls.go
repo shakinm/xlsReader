@@ -2,7 +2,7 @@ package xls
 
 import (
 	"encoding/binary"
-	"github.com/shakinm/xlsReader/cfb"
+	"github.com/Alliera/xlsReader/cfb"
 	"io"
 )
 
@@ -75,7 +75,6 @@ func readStream(reader io.ReadSeeker, streamSize uint32) (workbook Workbook, err
 	if err != nil {
 		return workbook, nil
 	}
-
 
 	if err != nil {
 		return workbook, nil

@@ -1,7 +1,7 @@
 package record
 
 import (
-	"github.com/shakinm/xlsReader/helpers"
+	"github.com/Alliera/xlsReader/helpers"
 	"golang.org/x/text/encoding/charmap"
 	"reflect"
 	"strings"
@@ -38,12 +38,12 @@ type LabelBIFF8 struct {
 }
 
 type LabelBIFF5 struct {
-	rw   [2]byte
-	col  [2]byte
-	ixfe [2]byte
-	cch  [2]byte
+	rw    [2]byte
+	col   [2]byte
+	ixfe  [2]byte
+	cch   [2]byte
 	grbit [1]byte
-	rgb  []byte
+	rgb   []byte
 }
 
 func (r *LabelBIFF8) GetRow() [2]byte {

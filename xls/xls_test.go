@@ -41,8 +41,8 @@ func TestGetWorkBook(t *testing.T) {
 					t.Error("Expected 'String 3', got ", c.GetString())
 				}
 			case 4:
-				if c.GetString() != "https://github.com/shakinm/xlsReader" {
-					t.Error("Expected 'https://github.com/shakinm/xlsReader', got ", c.GetString())
+				if c.GetString() != "https://github.com/Alliera/xlsReader" {
+					t.Error("Expected 'https://github.com/Alliera/xlsReader', got ", c.GetString())
 				}
 			case 5:
 				if c.GetString() != "" {
@@ -101,11 +101,11 @@ func TestMiniFatWorkBook(t *testing.T) {
 		sheet, _ := wb.GetSheet(i)
 		if sheet.GetRows() != nil {
 			for _, row := range sheet.GetRows() {
-				if row  != nil {
+				if row != nil {
 
 					for _, col := range row.GetCols() {
 
-					//	fmt.Println(col.GetString())
+						//	fmt.Println(col.GetString())
 						xf := col.GetXFIndex()
 						//fmt.Println(xf)
 						style := wb.GetXFbyIndex(xf)

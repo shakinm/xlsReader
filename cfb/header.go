@@ -3,7 +3,7 @@ package cfb
 import (
 	"bytes"
 	"errors"
-	"github.com/shakinm/xlsReader/helpers"
+	"github.com/Alliera/xlsReader/helpers"
 )
 
 //HeaderSignature Identification signature for the compound file structure, and MUST be
@@ -69,7 +69,7 @@ type Header struct {
 }
 
 func (h *Header) getDIFATEntry(i uint32) []byte {
-	return h.DIFAT[i*4:(i*4)+4]
+	return h.DIFAT[i*4 : (i*4)+4]
 }
 
 func (h *Header) sectorSize() (size uint32) {
@@ -132,4 +132,3 @@ func (h *Header) validate() (err error) { // nolint: gocyclo
 
 	return
 }
-

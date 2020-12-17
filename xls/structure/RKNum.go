@@ -1,7 +1,7 @@
 package structure
 
 import (
-	"github.com/shakinm/xlsReader/helpers"
+	"github.com/Alliera/xlsReader/helpers"
 	"math"
 	"strconv"
 )
@@ -36,7 +36,7 @@ func (r *RKNum) GetFloat() (fn float64) {
 	if isFloat {
 		fn = f
 	} else {
-		fn=float64(i)
+		fn = float64(i)
 	}
 	return fn
 }
