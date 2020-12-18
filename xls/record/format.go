@@ -106,7 +106,6 @@ func (r *Format) GetFormatString(data structure.CellData) string {
 			} else if strings.Contains(r.String(), "0") {
 				return fmt.Sprintf("%.f", data.GetFloat64())
 			} else {
-				fmt.Println(r.String())
 				t := helpers.TimeFromExcelTime(data.GetFloat64(), false)
 				dateFormat := strings.ReplaceAll(r.String(), "HH:MM:SS", "hh:mm:ss")
 				dateFormat = strings.ReplaceAll(dateFormat, "\\", "")
