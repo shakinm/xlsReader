@@ -53,7 +53,7 @@ type biff8 struct {
 	sfo      [4]byte
 }
 
-var FlagBIFF5 = []byte{0x00, 0x06}
+var FlagBIFF5 = []byte{0x00, 0x05}
 
 type biff5 struct {
 	vers     [2]byte
