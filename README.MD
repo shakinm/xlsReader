@@ -1,5 +1,4 @@
 ## xlsReader
-[![Donate](https://img.shields.io/badge/donate-capusta.space-green)](https://capu.st/billc8f0bf29-59cd)
 
 Библиотека для чтения xls файлов / Golang read xls library
 
