@@ -116,15 +116,13 @@ func iOft(offset *uint32, inc uint32) uint32 {
 	return *offset
 }
 
-func (s *XLUnicodeRichExtendedString) String() string {
-
+func (s *XLUnicodeRichExtendedString) String() (str string) {
 	if s.FHighByte&1 == 1 {
 		name := helpers.BytesToUints16(s.Rgb[:])
-		runes := utf16.Decode(name)
-		return string(runes)
+		str = string(utf16.Decode(name))
 	} else {
-
-		return string(s.Rgb[:])
+		str = string(s.Rgb[:])
 	}
-
+	str = helpers.StrToUtf8(str)
+	return
 }

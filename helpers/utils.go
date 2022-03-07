@@ -3,7 +3,16 @@ package helpers
 import (
 	"bytes"
 	"encoding/binary"
+	"golang.org/x/net/html/charset"
+	"io/ioutil"
+	"strings"
 )
+
+func StrToUtf8(s string) string {
+	r, _ := charset.NewReader(strings.NewReader(s), "")
+	result, _ := ioutil.ReadAll(r)
+	return string(result)
+}
 
 func BytesToUint64(b []byte) uint64 {
 	return binary.LittleEndian.Uint64(b)
@@ -25,7 +34,6 @@ func BytesInSlice(a []byte, list [][]byte) bool {
 	}
 	return false
 }
-
 
 func BytesToUints16(b []byte) (res []uint16) {
 
