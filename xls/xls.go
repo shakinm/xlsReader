@@ -11,9 +11,12 @@ func OpenFile(fileName string) (workbook Workbook, err error) {
 
 	adaptor, err := cfb.OpenFile(fileName)
 
+	defer adaptor.CloseFile()
+
 	if err != nil {
 		return workbook, err
 	}
+
 	return openCfb(adaptor)
 }
 
@@ -75,7 +78,6 @@ func readStream(reader io.ReadSeeker, streamSize uint32) (workbook Workbook, err
 	if err != nil {
 		return workbook, nil
 	}
-
 
 	if err != nil {
 		return workbook, nil

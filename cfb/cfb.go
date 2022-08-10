@@ -13,6 +13,7 @@ import (
 type Cfb struct {
 	header           Header
 	file             io.ReadSeeker
+	fLink            *os.File
 	difatPositions   []uint32
 	miniFatPositions []uint32
 	dirs             []*Directory
@@ -29,14 +30,20 @@ func (cfb *Cfb) GetDirs() []*Directory {
 	return cfb.dirs
 }
 
+func (cfb *Cfb) CloseFile() error {
+	return cfb.fLink.Close()
+}
+
 // OpenFile - Open document from the file
 func OpenFile(filename string) (cfb Cfb, err error) {
 
-	cfb.file, err = os.Open(filepath.Clean(filename))
+	cfb.fLink, err = os.Open(filepath.Clean(filename))
 
 	if err != nil {
 		return cfb, err
 	}
+
+	cfb.file = cfb.fLink
 
 	err = open(&cfb)
 
