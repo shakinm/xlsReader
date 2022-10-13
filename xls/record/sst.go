@@ -31,6 +31,13 @@ type SST struct {
 	Rgb       []structure.XLUnicodeRichExtendedString
 	chLen     int
 	ByteLen   int
+
+	// These are needed to properly handle CONTINUE records.
+	// CONTINUE record contains grbit in the first byte unless it's a formatting run
+	// so we need to know whether all the string bytes have been consumed.
+	// OpenOffice.org - Microsoft Excel File Format - section 5.21
+	RgbDone bool
+	Grbit   byte
 }
 
 func (s *SST) RgbAppend(bts []byte) (err error) {
@@ -80,9 +87,15 @@ func (s *SST) Read(readType string, grbit byte, prevLen int32) () {
 
 		readType = ""
 
-		if cch >= (len(s.RgbSrc)-3)/(1+int(grbit&1)) || s.ByteLen > 0 {
+		s.Grbit = grbit
 
-			addBytesLen := (len(s.RgbSrc) - 3) - s.ByteLen
+		headLen := 3
+		headLen += int(grbit>>2&1) * 4
+		headLen += int(grbit>>3&1) * 2
+
+		if cch >= (len(s.RgbSrc)-headLen)/(1+int(grbit&1)) || s.ByteLen > 0 {
+
+			addBytesLen := (len(s.RgbSrc) - headLen) - s.ByteLen
 
 			if cch-s.chLen > addBytesLen/(1+int(grbit&1)) {
 				s.chLen = s.chLen + addBytesLen/(1+int(grbit&1))
