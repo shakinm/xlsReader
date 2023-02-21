@@ -104,13 +104,14 @@ Next:
 		if SSTContinue {
 			readType = "continue"
 
-			if len(wb.sst.RgbSrc) == 0  {
+			if len(wb.sst.RgbSrc) == 0 || wb.sst.RgbDone {
 				grbitOffset = 0
 			} else {
 				grbitOffset = 1
 			}
 
 			grbit = stream[sPoint]
+			grbit |= wb.sst.Grbit & 0b1100
 
 			wb.sst.RgbSrc = append(wb.sst.RgbSrc, stream[sPoint+grbitOffset:sPoint+recordDataLength]...)
 			wb.sst.Read(readType, grbit, prevLen)
