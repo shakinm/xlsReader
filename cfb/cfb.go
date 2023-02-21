@@ -3,10 +3,11 @@ package cfb
 import (
 	"bytes"
 	"encoding/binary"
-	"github.com/shakinm/xlsReader/helpers"
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/shakinm/xlsReader/helpers"
 )
 
 // Cfb - Compound File Binary
@@ -227,14 +228,16 @@ func (cfb *Cfb) getFatSectors() (err error) { // nolint: gocyclo
 }
 func (cfb *Cfb) getDataFromMiniFat(miniFatSectorLocation uint32, offset uint32) (data []byte, err error) {
 
-	sPoint := cfb.sectorOffset(miniFatSectorLocation)
-	point := sPoint + cfb.calculateMiniFatOffset(offset)
+	point := cfb.calculateMiniFatOffset(offset)
+
+	containerStreamBytes, _ := cfb.getDataFromFatChain(miniFatSectorLocation)
+	containerStream := bytes.NewReader(containerStreamBytes)
 
 	for {
 
 		sector := NewMiniFatSector(&cfb.header)
 
-		err = cfb.getData(point, &sector.Data)
+		_, err := containerStream.ReadAt(sector.Data, int64(point))
 
 		if err != nil {
 			return data, err
@@ -248,7 +251,7 @@ func (cfb *Cfb) getDataFromMiniFat(miniFatSectorLocation uint32, offset uint32) 
 
 		offset = cfb.miniFatPositions[offset]
 
-		point = sPoint + cfb.calculateMiniFatOffset(offset)
+		point = cfb.calculateMiniFatOffset(offset)
 
 	}
 
