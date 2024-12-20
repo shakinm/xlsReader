@@ -10,6 +10,12 @@ import (
 	"strings"
 )
 
+const (
+	DefaultDateFormat            = "DD/MM/YYYY"
+	DefaultTimeFormat            = "hh:mm"
+	DefaultTimeFormatWithSeconds = "hh:mm:ss"
+)
+
 //FORMAT: Number Format
 
 var FormatRecord = []byte{0x1E, 0x04} //(41Eh)
@@ -107,8 +113,14 @@ func (r *Format) GetFormatString(data structure.CellData) string {
 				return fmt.Sprintf("%.f", data.GetFloat64())
 			} else {
 				t := helpers.TimeFromExcelTime(data.GetFloat64(), false)
-				dateFormat := strings.ReplaceAll(r.String(), "HH:MM:SS", "hh:mm:ss")
-				dateFormat = strings.ReplaceAll(dateFormat, "\\", "")
+				dateStringReplacer := strings.NewReplacer(
+					"dd/MM/yyyy", DefaultDateFormat,
+					"HH:mm", DefaultTimeFormat,
+					"HH:MM:SS", DefaultTimeFormatWithSeconds,
+					"\\", "",
+				)
+				dateFormat := dateStringReplacer.Replace(r.String())
+
 				return fmtdate.Format(dateFormat, t)
 			}
 

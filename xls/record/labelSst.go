@@ -40,7 +40,13 @@ func (r *LabelSSt) GetCol() [2]byte {
 }
 
 func (r *LabelSSt) GetString() string {
-	return r.sst.Rgb[helpers.BytesToUint32(r.isst[:])].String()
+	number := helpers.BytesToUint32(r.isst[:])
+
+	if int(number) < len(r.sst.Rgb) {
+		return r.sst.Rgb[number].String()
+	}
+
+	return ""
 }
 
 func (r *LabelSSt) GetFloat64() (fl float64) {
@@ -57,9 +63,6 @@ func (r *LabelSSt) GetType() string {
 func (r *LabelSSt) GetXFIndex() int {
 	return int(helpers.BytesToUint16(r.ixfe[:]))
 }
-
-
-
 
 func (r *LabelSSt) Read(stream []byte, sst *SST) {
 	r.sst = sst
