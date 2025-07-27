@@ -1,34 +1,35 @@
 package structure
 
 import (
-	"github.com/shakinm/xlsReader/helpers"
 	"math"
 	"strconv"
+
+	"github.com/shakinm/xlsReader/helpers"
 )
 
 type RKNum [4]byte
 
 func (r *RKNum) number() (intNum int64, floatNum float64, isFloat bool) {
+	// Fix from: https://github.com/shakinm/xlsReader/issues/35
 	rk := helpers.BytesToUint32(r[:])
-
-	val := uint64(rk >> 2)
-	rkType := uint(rk << 30 >> 30)
-
-	var fn float64
-	switch rkType {
-	case 0:
-		fn = math.Float64frombits(uint64(rk&0xfffffffc) << 32)
-		isFloat = true
-	case 1:
-
-		fn = math.Float64frombits(uint64(rk&0xfffffffc)<<32) / 100
-		isFloat = true
-	case 3:
-		fn = float64(val) / 100
-		isFloat = true
+	isFloat = rk&0x02 == 0
+	isMul := rk&0x01 == 1
+	if isFloat {
+		floatNum = math.Float64frombits(uint64(rk&0xfffffffc) << 32)
+		if isMul {
+			floatNum /= 100
+		}
+	} else {
+		intNum32 := uint32(rk >> 2)
+		if rk&0x80000000 > 0 {
+			intNum32 = intNum32 | 0xC0000000
+		}
+		if isMul {
+			intNum32 /= 100
+		}
+		intNum = int64(int32(intNum32))
 	}
-
-	return int64(val), float64(fn), isFloat
+	return
 }
 
 func (r *RKNum) GetFloat() (fn float64) {
@@ -36,7 +37,7 @@ func (r *RKNum) GetFloat() (fn float64) {
 	if isFloat {
 		fn = f
 	} else {
-		fn=float64(i)
+		fn = float64(i)
 	}
 	return fn
 }
