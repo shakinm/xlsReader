@@ -1,9 +1,10 @@
 package record
 
 import (
+	"io"
+
 	"github.com/shakinm/xlsReader/helpers"
 	"github.com/shakinm/xlsReader/xls/structure"
-	"io"
 )
 
 // SST: Shared String Table
@@ -55,7 +56,7 @@ func abs(x int) int {
 	return x
 }
 
-func (s *SST) Read(readType string, grbit byte, prevLen int32) () {
+func (s *SST) Read(readType string, grbit byte, prevLen int32) {
 
 	defer r()
 
@@ -72,6 +73,27 @@ func (s *SST) Read(readType string, grbit byte, prevLen int32) () {
 
 		if readType != "continue" {
 			grbit = s.RgbSrc[2:3][0]
+		}
+
+		// Expand a compressed CONTINUE segment of a plain UTF-16LE string.
+		// The assembled string is decoded using the original header's encoding.
+		if readType == "continue" && s.RgbSrc[2] == 1 && grbit&1 == 0 &&
+			s.chLen > 0 && s.ByteLen == 2*s.chLen {
+			start := 3 + s.ByteLen
+			n := cch - s.chLen
+			if available := len(s.RgbSrc) - start; n > available {
+				n = available
+			}
+
+			if n > 0 {
+				buf := make([]byte, 0, len(s.RgbSrc)+n)
+				buf = append(buf, s.RgbSrc[:start]...)
+				for _, b := range s.RgbSrc[start : start+n] {
+					buf = append(buf, b, 0)
+				}
+				s.RgbSrc = append(buf, s.RgbSrc[start+n:]...)
+				grbit |= 1
+			}
 		}
 
 		if readType == "continue" && prevLen == 0 && s.ByteLen == 0 {
